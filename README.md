@@ -25,7 +25,7 @@ Go语言版本的表单构建器，移植自PHP版本的FormBuilder。基于 [@f
 ## 安装
 
 ```bash
-go get github.com/form-builder-go
+go get github.com/FlameMida/form-builder-go
 ```
 
 ## 许可证
