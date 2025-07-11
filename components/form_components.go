@@ -23,13 +23,13 @@ func NewSelect(field, title string) *Select {
 }
 
 // Options sets multiple options at once
-func (s *Select) Options(options []contracts.Option) contracts.OptionComponent {
+func (s *Select) Options(options []contracts.Option) *Select {
 	s.options = options
 	return s
 }
 
 // AddOption adds a single option
-func (s *Select) AddOption(value interface{}, label string) contracts.OptionComponent {
+func (s *Select) AddOption(value interface{}, label string) *Select {
 	s.options = append(s.options, contracts.Option{
 		Value: value,
 		Label: label,
@@ -38,7 +38,7 @@ func (s *Select) AddOption(value interface{}, label string) contracts.OptionComp
 }
 
 // AddOptions adds multiple options from a struct slice
-func (s *Select) AddOptions(options []contracts.Option) contracts.OptionComponent {
+func (s *Select) AddOptions(options []contracts.Option) *Select {
 	s.options = append(s.options, options...)
 	return s
 }
@@ -148,13 +148,13 @@ func NewRadio(field, title string) *Radio {
 }
 
 // Options sets multiple options at once
-func (r *Radio) Options(options []contracts.Option) contracts.OptionComponent {
+func (r *Radio) Options(options []contracts.Option) *Radio {
 	r.options = options
 	return r
 }
 
 // AddOption adds a single option
-func (r *Radio) AddOption(value interface{}, label string) contracts.OptionComponent {
+func (r *Radio) AddOption(value interface{}, label string) *Radio {
 	r.options = append(r.options, contracts.Option{
 		Value: value,
 		Label: label,
@@ -163,7 +163,7 @@ func (r *Radio) AddOption(value interface{}, label string) contracts.OptionCompo
 }
 
 // AddOptions adds multiple options from a struct slice
-func (r *Radio) AddOptions(options []contracts.Option) contracts.OptionComponent {
+func (r *Radio) AddOptions(options []contracts.Option) *Radio {
 	r.options = append(r.options, options...)
 	return r
 }
@@ -279,13 +279,13 @@ func NewCheckbox(field, title string) *Checkbox {
 }
 
 // Options sets multiple options at once
-func (c *Checkbox) Options(options []contracts.Option) contracts.OptionComponent {
+func (c *Checkbox) Options(options []contracts.Option) *Checkbox {
 	c.options = options
 	return c
 }
 
 // AddOption adds a single option
-func (c *Checkbox) AddOption(value interface{}, label string) contracts.OptionComponent {
+func (c *Checkbox) AddOption(value interface{}, label string) *Checkbox {
 	c.options = append(c.options, contracts.Option{
 		Value: value,
 		Label: label,
@@ -294,7 +294,7 @@ func (c *Checkbox) AddOption(value interface{}, label string) contracts.OptionCo
 }
 
 // AddOptions adds multiple options from a struct slice
-func (c *Checkbox) AddOptions(options []contracts.Option) contracts.OptionComponent {
+func (c *Checkbox) AddOptions(options []contracts.Option) *Checkbox {
 	c.options = append(c.options, options...)
 	return c
 }
@@ -631,18 +631,18 @@ func (r *Rate) ScoreTemplate(template string) *Rate {
 }
 
 // Required makes the rate required
-func (r *Rate) Required() contracts.FormComponent {
+func (r *Rate) Required() *Rate {
 	r.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", r.title)))
 	return r
 }
 
 // Placeholder sets placeholder (not applicable for rate, but required by interface)
-func (r *Rate) Placeholder(text string) contracts.FormComponent {
+func (r *Rate) Placeholder(text string) *Rate {
 	return r
 }
 
 // Disabled sets the disabled state
-func (r *Rate) Disabled(disabled bool) contracts.FormComponent {
+func (r *Rate) Disabled(disabled bool) *Rate {
 	r.SetProp("disabled", disabled)
 	return r
 }
