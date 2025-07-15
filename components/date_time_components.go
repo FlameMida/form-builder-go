@@ -136,6 +136,31 @@ func (d *DatePicker) Disabled(disabled bool) contracts.FormComponent {
 func (d *DatePicker) Build() map[string]interface{} {
 	result := d.BaseComponent.Build()
 	result["type"] = "el-date-picker"
+
+	// Override value based on date picker mode
+	if d.value == nil {
+		// Check if it's range mode or multiple mode
+		if dateType, exists := d.props["type"]; exists {
+			if typeStr, ok := dateType.(string); ok {
+				if strings.Contains(typeStr, "range") {
+					result["value"] = []interface{}{} // Empty array for range modes
+				} else {
+					result["value"] = "" // Empty string for single date
+				}
+			} else {
+				result["value"] = "" // Default to empty string
+			}
+		} else if multiple, exists := d.props["multiple"]; exists {
+			if val, ok := multiple.(bool); ok && val {
+				result["value"] = []interface{}{} // Empty array for multiple selection
+			} else {
+				result["value"] = "" // Empty string for single date
+			}
+		} else {
+			result["value"] = "" // Default to empty string
+		}
+	}
+
 	return result
 }
 
@@ -253,6 +278,20 @@ func (t *TimePicker) Disabled(disabled bool) contracts.FormComponent {
 func (t *TimePicker) Build() map[string]interface{} {
 	result := t.BaseComponent.Build()
 	result["type"] = "el-time-picker"
+
+	// Override value based on range mode
+	if t.value == nil {
+		if isRange, exists := t.props["is-range"]; exists {
+			if val, ok := isRange.(bool); ok && val {
+				result["value"] = []interface{}{} // Empty array for range mode
+			} else {
+				result["value"] = "" // Empty string for single time
+			}
+		} else {
+			result["value"] = "" // Default to empty string
+		}
+	}
+
 	return result
 }
 
@@ -501,5 +540,19 @@ func (u *Upload) Disabled(disabled bool) contracts.FormComponent {
 func (u *Upload) Build() map[string]interface{} {
 	result := u.BaseComponent.Build()
 	result["type"] = "el-upload"
+
+	// Override value based on upload limit
+	if u.value == nil {
+		if limit, exists := u.props["limit"]; exists {
+			if val, ok := limit.(int); ok && val == 1 {
+				result["value"] = "" // Empty string for single file upload
+			} else {
+				result["value"] = []interface{}{} // Empty array for multiple file upload
+			}
+		} else {
+			result["value"] = []interface{}{} // Default to empty array
+		}
+	}
+
 	return result
 }

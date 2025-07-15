@@ -143,6 +143,11 @@ func (c *Cascader) Build() map[string]interface{} {
 		result["options"] = c.options
 	}
 
+	// Override value - cascader always uses array
+	if c.value == nil {
+		result["value"] = []interface{}{} // Empty array for cascader
+	}
+
 	return result
 }
 
@@ -356,6 +361,19 @@ func (t *Tree) Build() map[string]interface{} {
 	// Add data to props
 	if len(t.data) > 0 {
 		result["data"] = t.data
+	}
+
+	// Override value based on checkbox mode
+	if t.value == nil {
+		if showCheckbox, exists := t.props["show-checkbox"]; exists {
+			if val, ok := showCheckbox.(bool); ok && val {
+				result["value"] = []interface{}{} // Empty array for checkbox mode
+			} else {
+				result["value"] = "" // Empty string for single selection
+			}
+		} else {
+			result["value"] = "" // Empty string for single selection
+		}
 	}
 
 	return result

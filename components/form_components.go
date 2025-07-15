@@ -128,6 +128,15 @@ func (s *Select) Build() map[string]interface{} {
 		result["options"] = s.options
 	}
 
+	// Override value based on multiple selection mode
+	if s.value == nil {
+		if s.isMultiple() {
+			result["value"] = []interface{}{} // Empty array for multiple selection
+		} else {
+			result["value"] = "" // Empty string for single selection
+		}
+	}
+
 	return result
 }
 
@@ -359,6 +368,11 @@ func (c *Checkbox) Build() map[string]interface{} {
 		result["options"] = c.options
 	}
 
+	// Override value - checkbox always uses array
+	if c.value == nil {
+		result["value"] = []interface{}{} // Empty array for checkbox
+	}
+
 	return result
 }
 
@@ -554,6 +568,20 @@ func (s *Slider) Disabled(disabled bool) *Slider {
 func (s *Slider) Build() map[string]interface{} {
 	result := s.BaseComponent.Build()
 	result["type"] = "el-slider"
+
+	// Override value based on range mode
+	if s.value == nil {
+		if range_, exists := s.props["range"]; exists {
+			if val, ok := range_.(bool); ok && val {
+				result["value"] = []interface{}{} // Empty array for range mode
+			} else {
+				result["value"] = 0 // Default number for single value mode
+			}
+		} else {
+			result["value"] = 0 // Default number for single value mode
+		}
+	}
+
 	return result
 }
 
