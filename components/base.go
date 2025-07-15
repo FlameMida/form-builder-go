@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/FlameMida/form-builder-go/contracts"
-	"github.com/FlameMida/form-builder-go/rules"
 )
 
 // BaseComponent provides common functionality for all components
@@ -57,6 +56,7 @@ func (b *BaseComponent) Build() map[string]interface{} {
 		"props": b.props,
 	}
 
+	// 始终包含value字段，如果没有设置则为空字符串（匹配PHP格式）
 	if b.value != nil {
 		result["value"] = b.value
 	} else {
@@ -134,7 +134,7 @@ func (i *Input) Placeholder(text string) *Input {
 
 // Required makes the input required
 func (i *Input) Required() *Input {
-	i.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", i.title)))
+	i.AddValidateRule(NewStringRequiredRule(fmt.Sprintf("请输入%s", i.title)))
 	return i
 }
 
@@ -193,6 +193,7 @@ func (i *Input) Build() map[string]interface{} {
 	result := i.BaseComponent.Build()
 	result["type"] = i.componentType
 
+	// Handle hidden property at root level (PHP style)
 	if hidden := i.GetProp("hidden"); hidden == true {
 		result["hidden"] = true
 		// Remove from props
@@ -269,7 +270,7 @@ func (s *Switch) InactiveValue(value interface{}) *Switch {
 
 // Required makes the switch required
 func (s *Switch) Required() *Switch {
-	s.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", s.title)))
+	s.AddValidateRule(NewStringRequiredRule(fmt.Sprintf("请设置%s", s.title)))
 	return s
 }
 

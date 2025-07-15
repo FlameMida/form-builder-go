@@ -3,9 +3,9 @@ package components
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/FlameMida/form-builder-go/contracts"
-	"github.com/FlameMida/form-builder-go/rules"
 )
 
 // Select component implementation
@@ -87,8 +87,23 @@ func (s *Select) Size(size string) *Select {
 
 // Required makes the select required
 func (s *Select) Required() *Select {
-	s.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", s.title)))
+	// Create required rule with appropriate type based on multiple selection
+	rule := &SelectRequiredRule{
+		message:    fmt.Sprintf("请选择%s", s.title),
+		isMultiple: s.isMultiple(),
+	}
+	s.AddValidateRule(rule)
 	return s
+}
+
+// isMultiple checks if the select is in multiple mode
+func (s *Select) isMultiple() bool {
+	if multiple, exists := s.props["multiple"]; exists {
+		if val, ok := multiple.(bool); ok {
+			return val
+		}
+	}
+	return false
 }
 
 // Placeholder sets placeholder (not typically used for select, but required by interface)
@@ -205,7 +220,7 @@ func (r *Radio) Size(size string) *Radio {
 
 // Required makes the radio required
 func (r *Radio) Required() *Radio {
-	r.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", r.title)))
+	r.AddValidateRule(NewStringRequiredRule(fmt.Sprintf("请选择%s", r.title)))
 	return r
 }
 
@@ -319,7 +334,7 @@ func (c *Checkbox) Size(size string) *Checkbox {
 
 // Required makes the checkbox required
 func (c *Checkbox) Required() *Checkbox {
-	c.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", c.title)))
+	c.AddValidateRule(NewArrayRequiredRule(fmt.Sprintf("请选择%s", c.title)))
 	return c
 }
 
@@ -409,7 +424,7 @@ func (i *InputNumber) ControlsPosition(position string) *InputNumber {
 
 // Required makes the input number required
 func (i *InputNumber) Required() *InputNumber {
-	i.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", i.title)))
+	i.AddValidateRule(NewNumberRequiredRule(fmt.Sprintf("请输入%s", i.title)))
 	return i
 }
 
@@ -506,7 +521,21 @@ func (s *Slider) Height(height string) *Slider {
 
 // Required makes the slider required
 func (s *Slider) Required() *Slider {
-	s.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", s.title)))
+	// Create conditional required rule based on range mode
+	rule := NewConditionalRequiredRule(
+		fmt.Sprintf("请设置%s", s.title),
+		s,
+		func(component interface{}) string {
+			slider := component.(*Slider)
+			if range_, exists := slider.props["range"]; exists {
+				if val, ok := range_.(bool); ok && val {
+					return "array" // Range mode uses array validation
+				}
+			}
+			return "number" // Single value mode uses number validation
+		},
+	)
+	s.AddValidateRule(rule)
 	return s
 }
 
@@ -632,7 +661,7 @@ func (r *Rate) ScoreTemplate(template string) *Rate {
 
 // Required makes the rate required
 func (r *Rate) Required() *Rate {
-	r.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", r.title)))
+	r.AddValidateRule(NewNumberRequiredRule(fmt.Sprintf("请选择%s", r.title)))
 	return r
 }
 
@@ -652,4 +681,77 @@ func (r *Rate) Build() map[string]interface{} {
 	result := r.BaseComponent.Build()
 	result["type"] = "el-rate"
 	return result
+}
+
+// SelectRequiredRule implements a required validation rule for select components
+// with appropriate type based on multiple selection mode
+type SelectRequiredRule struct {
+	message    string
+	isMultiple bool
+}
+
+// Type returns the appropriate validation type based on multiple selection mode
+func (r *SelectRequiredRule) Type() string {
+	if r.isMultiple {
+		return "array"
+	}
+	return "string"
+}
+
+// Message returns the validation message
+func (r *SelectRequiredRule) Message() string {
+	return r.message
+}
+
+// Validate validates that the value is not empty
+func (r *SelectRequiredRule) Validate(value interface{}) error {
+	if value == nil {
+		return fmt.Errorf(r.message)
+	}
+
+	if r.isMultiple {
+		// For multiple selection, value should be an array
+		switch v := value.(type) {
+		case []interface{}:
+			if len(v) == 0 {
+				return fmt.Errorf(r.message)
+			}
+		case []string:
+			if len(v) == 0 {
+				return fmt.Errorf(r.message)
+			}
+		case []int:
+			if len(v) == 0 {
+				return fmt.Errorf(r.message)
+			}
+		default:
+			return fmt.Errorf(r.message)
+		}
+	} else {
+		// For single selection, value should be a non-empty string or number
+		switch v := value.(type) {
+		case string:
+			if strings.TrimSpace(v) == "" {
+				return fmt.Errorf(r.message)
+			}
+		case int, float64:
+			// Numbers are always valid if not nil
+		default:
+			if v == "" || v == nil {
+				return fmt.Errorf(r.message)
+			}
+		}
+	}
+
+	return nil
+}
+
+// ToMap returns the rule as a map for JSON serialization
+func (r *SelectRequiredRule) ToMap() map[string]interface{} {
+	return map[string]interface{}{
+		"required": true,
+		"message":  r.message,
+		"type":     r.Type(),
+		"trigger":  "change",
+	}
 }

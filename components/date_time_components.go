@@ -3,9 +3,9 @@ package components
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/FlameMida/form-builder-go/contracts"
-	"github.com/FlameMida/form-builder-go/rules"
 )
 
 // DatePicker component implementation
@@ -94,7 +94,29 @@ func (d *DatePicker) DefaultTime(time interface{}) *DatePicker {
 
 // Required makes the date picker required
 func (d *DatePicker) Required() contracts.FormComponent {
-	d.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", d.title)))
+	// Create conditional required rule based on date picker mode
+	rule := NewConditionalRequiredRule(
+		fmt.Sprintf("请选择%s", d.title),
+		d,
+		func(component interface{}) string {
+			picker := component.(*DatePicker)
+			// Check if it's range mode or multiple mode
+			if dateType, exists := picker.props["type"]; exists {
+				if typeStr, ok := dateType.(string); ok {
+					if strings.Contains(typeStr, "range") {
+						return "array" // Range modes use array validation
+					}
+				}
+			}
+			if multiple, exists := picker.props["multiple"]; exists {
+				if val, ok := multiple.(bool); ok && val {
+					return "array" // Multiple selection uses array validation
+				}
+			}
+			return "date" // Single date selection uses date validation (fallback to string)
+		},
+	)
+	d.AddValidateRule(rule)
 	return d
 }
 
@@ -197,7 +219,21 @@ func (t *TimePicker) RangeSeparator(separator string) *TimePicker {
 
 // Required makes the time picker required
 func (t *TimePicker) Required() contracts.FormComponent {
-	t.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", t.title)))
+	// Create conditional required rule based on range mode
+	rule := NewConditionalRequiredRule(
+		fmt.Sprintf("请选择%s", t.title),
+		t,
+		func(component interface{}) string {
+			picker := component.(*TimePicker)
+			if isRange, exists := picker.props["is-range"]; exists {
+				if val, ok := isRange.(bool); ok && val {
+					return "array" // Range mode uses array validation
+				}
+			}
+			return "string" // Single time selection uses string validation
+		},
+	)
+	t.AddValidateRule(rule)
 	return t
 }
 
@@ -258,7 +294,7 @@ func (c *ColorPicker) Size(size string) *ColorPicker {
 
 // Required makes the color picker required
 func (c *ColorPicker) Required() contracts.FormComponent {
-	c.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", c.title)))
+	c.AddValidateRule(NewStringRequiredRule(fmt.Sprintf("请选择%s", c.title)))
 	return c
 }
 
@@ -432,7 +468,21 @@ func (u *Upload) OnExceed(handler string) *Upload {
 
 // Required makes the upload required
 func (u *Upload) Required() contracts.FormComponent {
-	u.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", u.title)))
+	// Create conditional required rule based on upload limit
+	rule := NewConditionalRequiredRule(
+		fmt.Sprintf("请上传%s", u.title),
+		u,
+		func(component interface{}) string {
+			upload := component.(*Upload)
+			if limit, exists := upload.props["limit"]; exists {
+				if val, ok := limit.(int); ok && val == 1 {
+					return "string" // Single file upload uses string validation
+				}
+			}
+			return "array" // Multiple file upload uses array validation
+		},
+	)
+	u.AddValidateRule(rule)
 	return u
 }
 

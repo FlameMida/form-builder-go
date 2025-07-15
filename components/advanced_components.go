@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/FlameMida/form-builder-go/contracts"
-	"github.com/FlameMida/form-builder-go/rules"
 )
 
 // TreeNode represents a tree node structure
@@ -118,7 +117,7 @@ func (c *Cascader) PopperClass(class string) *Cascader {
 
 // Required makes the cascader required
 func (c *Cascader) Required() contracts.FormComponent {
-	c.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", c.title)))
+	c.AddValidateRule(NewArrayRequiredRule(fmt.Sprintf("请选择%s", c.title)))
 	return c
 }
 
@@ -319,7 +318,22 @@ func (t *Tree) AllowDrop(allowFunc string) *Tree {
 
 // Required makes the tree required
 func (t *Tree) Required() contracts.FormComponent {
-	t.AddValidateRule(rules.NewRequiredRule(fmt.Sprintf("%s 是必填项", t.title)))
+	// Create conditional required rule based on checkbox mode (multiple selection indicator)
+	rule := NewConditionalRequiredRule(
+		fmt.Sprintf("请选择%s", t.title),
+		t,
+		func(component interface{}) string {
+			tree := component.(*Tree)
+			// In Element UI, ShowCheckbox indicates multiple selection capability
+			if showCheckbox, exists := tree.props["show-checkbox"]; exists {
+				if val, ok := showCheckbox.(bool); ok && val {
+					return "array" // Checkbox mode uses array validation
+				}
+			}
+			return "string" // Single selection uses string validation
+		},
+	)
+	t.AddValidateRule(rule)
 	return t
 }
 

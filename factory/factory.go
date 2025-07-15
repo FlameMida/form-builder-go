@@ -49,9 +49,9 @@ func (Elm) Select(field, title string, value ...string) *components.Select {
 }
 
 // Radio creates an ElementUI radio component
-func (Elm) Radio(field, title string, value ...string) *components.Radio {
+func (Elm) Radio(field, title string, value ...any) *components.Radio {
 	radio := components.NewRadio(field, title)
-	if len(value) > 0 && value[0] != "" {
+	if len(value) > 0 {
 		radio.SetValue(value[0])
 	}
 	return radio
@@ -243,7 +243,7 @@ func (Iview) Select(field, title string, value ...string) *components.Select {
 }
 
 // Radio creates an IView radio component
-func (Iview) Radio(field, title string, value ...string) *components.Radio {
+func (Iview) Radio(field, title string, value ...any) *components.Radio {
 	radio := components.NewRadio(field, title)
 	if len(value) > 0 {
 		radio.SetValue(value[0])
