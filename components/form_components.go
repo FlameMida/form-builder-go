@@ -16,10 +16,13 @@ type Select struct {
 
 // NewSelect creates a new select component
 func NewSelect(field, title string) *Select {
-	return &Select{
+	select_ := &Select{
 		BaseComponent: NewBaseComponent(field, title),
 		options:       make([]contracts.Option, 0),
 	}
+	// Set default placeholder
+	select_.SetProp("placeholder", fmt.Sprintf("请选择%s", title))
+	return select_
 }
 
 // Options sets multiple options at once
@@ -383,9 +386,12 @@ type InputNumber struct {
 
 // NewInputNumber creates a new input number component
 func NewInputNumber(field, title string) *InputNumber {
-	return &InputNumber{
+	inputNumber := &InputNumber{
 		BaseComponent: NewBaseComponent(field, title),
 	}
+	// Set default placeholder
+	inputNumber.SetProp("placeholder", fmt.Sprintf("请输入%s", title))
+	return inputNumber
 }
 
 // Min sets the minimum value

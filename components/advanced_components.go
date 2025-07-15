@@ -31,10 +31,13 @@ type Cascader struct {
 
 // NewCascader creates a new cascader component
 func NewCascader(field, title string) *Cascader {
-	return &Cascader{
+	cascader := &Cascader{
 		BaseComponent: NewBaseComponent(field, title),
 		options:       make([]CascaderOption, 0),
 	}
+	// Set default placeholder
+	cascader.SetProp("placeholder", fmt.Sprintf("请选择%s", title))
+	return cascader
 }
 
 // Options sets cascader options

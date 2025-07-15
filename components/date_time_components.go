@@ -15,9 +15,12 @@ type DatePicker struct {
 
 // NewDatePicker creates a new date picker component
 func NewDatePicker(field, title string) *DatePicker {
-	return &DatePicker{
+	datePicker := &DatePicker{
 		BaseComponent: NewBaseComponent(field, title),
 	}
+	// Set default placeholder
+	datePicker.SetProp("placeholder", fmt.Sprintf("请选择%s", title))
+	return datePicker
 }
 
 // Type sets the date picker type
@@ -171,9 +174,12 @@ type TimePicker struct {
 
 // NewTimePicker creates a new time picker component
 func NewTimePicker(field, title string) *TimePicker {
-	return &TimePicker{
+	timePicker := &TimePicker{
 		BaseComponent: NewBaseComponent(field, title),
 	}
+	// Set default placeholder
+	timePicker.SetProp("placeholder", fmt.Sprintf("请选择%s", title))
+	return timePicker
 }
 
 // IsRange enables range mode
@@ -302,9 +308,12 @@ type ColorPicker struct {
 
 // NewColorPicker creates a new color picker component
 func NewColorPicker(field, title string) *ColorPicker {
-	return &ColorPicker{
+	colorPicker := &ColorPicker{
 		BaseComponent: NewBaseComponent(field, title),
 	}
+	// Set default placeholder
+	colorPicker.SetProp("placeholder", fmt.Sprintf("请选择%s", title))
+	return colorPicker
 }
 
 // ShowAlpha enables alpha selection

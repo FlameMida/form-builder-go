@@ -114,10 +114,13 @@ type Input struct {
 
 // NewInput creates a new input component
 func NewInput(field, title string) *Input {
-	return &Input{
+	input := &Input{
 		BaseComponent: NewBaseComponent(field, title),
 		componentType: "el-input",
 	}
+	// Set default placeholder
+	input.SetProp("placeholder", fmt.Sprintf("请输入%s", title))
+	return input
 }
 
 // Type sets the input type
@@ -213,6 +216,8 @@ func NewTextarea(field, title string) *Textarea {
 	input := NewInput(field, title)
 	input.componentType = "el-input"
 	input.SetProp("type", "textarea")
+	// Override placeholder for textarea
+	input.SetProp("placeholder", fmt.Sprintf("请输入%s", title))
 	return &Textarea{Input: input}
 }
 
