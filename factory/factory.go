@@ -40,7 +40,7 @@ func (Elm) Switch(field, title string, value ...string) *components.Switch {
 }
 
 // Select creates an ElementUI select component
-func (Elm) Select(field, title string, value ...string) *components.Select {
+func (Elm) Select(field, title string, value ...any) *components.Select {
 	select_ := components.NewSelect(field, title)
 	if len(value) > 0 && value[0] != "" {
 		select_.SetValue(value[0])
