@@ -130,7 +130,7 @@ func (Elm) Upload(field, title string, value ...string) *components.Upload {
 }
 
 // Cascader creates an ElementUI cascader component
-func (Elm) Cascader(field, title string, value ...string) *components.Cascader {
+func (Elm) Cascader(field, title string, value ...any) *components.Cascader {
 	cascader := components.NewCascader(field, title)
 	if len(value) > 0 {
 		cascader.SetValue(value[0])
