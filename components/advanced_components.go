@@ -19,6 +19,7 @@ type TreeNode struct {
 type CascaderOption struct {
 	Label    string           `json:"label"`
 	Value    interface{}      `json:"value"`
+	Pid      int              `json:"pid"`
 	Children []CascaderOption `json:"children,omitempty"`
 	Disabled bool             `json:"disabled,omitempty"`
 }
