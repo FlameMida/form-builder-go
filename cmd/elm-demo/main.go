@@ -13,6 +13,20 @@ func main() {
 	fmt.Println("=== Go FormBuilder Elm Demo ===")
 
 	elm := factory.Elm{}
+	cascader := elm.Cascader("menu_list", "父级id").Options([]components.CascaderOption{
+		{
+			Label:    "1",
+			Value:    1,
+			Pid:      0,
+			Children: []components.CascaderOption{},
+			Disabled: false,
+		},
+	}).Filterable(true)
+	ints := []int{1}
+	sel := elm.Select("roles", "管理员角色", ints).Options([]contracts.Option{
+		{Value: 1, Label: "开启", Disabled: false},
+		{Value: 0, Label: "关闭", Disabled: false},
+	}).Multiple(true).Required()
 
 	// Elm::input('svip_name', '会员名：')->required()
 	svipName := elm.Input("svip_name", "会员名：").Required().Placeholder("请输入会员名：")
@@ -71,6 +85,8 @@ func main() {
 	// === 创建表单 ===
 	api := "/save"
 	form, err := elm.CreateForm(api, []interface{}{
+		cascader,
+		sel,
 		svipName,
 		svipType,
 		costPrice,
@@ -90,17 +106,12 @@ func main() {
 	action := form.GetAction()
 	method := form.GetMethod()
 	title := form.GetTitle()
-	view, err := form.View()
-	if err != nil {
-		log.Fatalf("生成视图失败: %v", err)
-	}
 
 	result := map[string]interface{}{
 		"rule":   rule,
 		"action": action,
 		"method": method,
 		"title":  title,
-		"view":   view,
 		"api":    api,
 	}
 

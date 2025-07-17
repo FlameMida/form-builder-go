@@ -44,12 +44,14 @@ func NewCascader(field, title string) *Cascader {
 // Options sets cascader options
 func (c *Cascader) Options(options []CascaderOption) *Cascader {
 	c.options = options
+	c.props["options"] = c.options
 	return c
 }
 
 // AddOption adds a single cascader option
 func (c *Cascader) AddOption(option CascaderOption) *Cascader {
 	c.options = append(c.options, option)
+	c.props["options"] = c.options
 	return c
 }
 
@@ -142,10 +144,10 @@ func (c *Cascader) Build() map[string]interface{} {
 	result := c.BaseComponent.Build()
 	result["type"] = "el-cascader"
 
-	// Add options to props
-	if len(c.options) > 0 {
-		result["options"] = c.options
-	}
+	//// Add options to props
+	//if len(c.options) > 0 {
+	//	result["options"] = c.options
+	//}
 
 	// Override value - cascader always uses array
 	if c.value == nil {
