@@ -133,6 +133,7 @@ func (Elm) Upload(field, title, action string, value ...string) *components.Uplo
 // UploadImages creates an ElementUI image upload component for multiple images.
 func (e Elm) UploadImages(field, title, action string, value ...[]string) *components.Upload {
 	upload := components.NewUpload(field, title)
+	upload.SetProp("maxLength", 0)
 	upload.Action(action).Accept("image/*").ListType("picture-card")
 	if len(value) > 0 {
 		// Convert []string to []interface{} for FileList
@@ -148,6 +149,7 @@ func (e Elm) UploadImages(field, title, action string, value ...[]string) *compo
 // UploadFiles creates an ElementUI file upload component for multiple files.
 func (e Elm) UploadFiles(field, title, action string, value ...[]string) *components.Upload {
 	upload := components.NewUpload(field, title)
+	upload.SetProp("maxLength", 0)
 	upload.Action(action)
 	if len(value) > 0 {
 		// Convert []string to []interface{} for FileList
@@ -163,6 +165,7 @@ func (e Elm) UploadFiles(field, title, action string, value ...[]string) *compon
 // UploadImage creates an ElementUI image upload component for a single image.
 func (e Elm) UploadImage(field, title, action string, value ...string) *components.Upload {
 	upload := components.NewUpload(field, title)
+	upload.SetProp("maxLength", 1)
 	upload.Action(action).Accept("image/*").ListType("picture-card").Limit(1)
 	if len(value) > 0 {
 		upload.SetValue(value[0])
@@ -173,6 +176,7 @@ func (e Elm) UploadImage(field, title, action string, value ...string) *componen
 // UploadFile creates an ElementUI file upload component for a single file.
 func (e Elm) UploadFile(field, title, action string, value ...string) *components.Upload {
 	upload := components.NewUpload(field, title)
+	upload.SetProp("maxLength", 1)
 	upload.SetProp("uploadType", "file")
 	upload.Action(action).Limit(1)
 	if len(value) > 0 {

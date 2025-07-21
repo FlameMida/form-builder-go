@@ -23,7 +23,6 @@ func NewFrame(field, title string) *Frame {
 		BaseComponent: NewBaseComponent(field, title),
 	}
 	frame.SetProp("type", FrameTypeInput)
-	frame.SetProp("maxLength", 0)
 	frame.Placeholder(fmt.Sprintf("请选择%s", title))
 	frame.SetType("frame")
 	return frame
