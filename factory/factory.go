@@ -173,6 +173,7 @@ func (e Elm) UploadImage(field, title, action string, value ...string) *componen
 // UploadFile creates an ElementUI file upload component for a single file.
 func (e Elm) UploadFile(field, title, action string, value ...string) *components.Upload {
 	upload := components.NewUpload(field, title)
+	upload.SetProp("uploadType", "file")
 	upload.Action(action).Limit(1)
 	if len(value) > 0 {
 		upload.SetValue(value[0])
@@ -226,10 +227,20 @@ func (e Elm) Frame(field, title, src string, value ...interface{}) *components.F
 	return frame
 }
 
+// FrameImage creates an ElementUI image frame component for multiple images.
+func (e Elm) FrameImage(field, title, src string, value ...string) *components.Frame {
+	frame := components.NewFrame(field, title)
+	frame.Src(src).SetPropType(components.FrameTypeImage)
+	if len(value) > 0 {
+		frame.SetValue(value[0])
+	}
+	return frame
+}
+
 // FrameImages creates an ElementUI image frame component for multiple images.
 func (e Elm) FrameImages(field, title, src string, value ...[]string) *components.Frame {
 	frame := components.NewFrame(field, title)
-	frame.Src(src).Type(components.FrameTypeImage)
+	frame.Src(src).SetPropType(components.FrameTypeImage)
 	if len(value) > 0 {
 		// Convert []string to []interface{} for SetValue
 		interfaceSlice := make([]interface{}, len(value[0]))
@@ -499,7 +510,7 @@ func (i Iview) Frame(field, title, src string, value ...interface{}) *components
 // FrameImages creates an IView image frame component for multiple images.
 func (i Iview) FrameImages(field, title, src string, value ...[]string) *components.Frame {
 	frame := components.NewFrame(field, title)
-	frame.Src(src).Type(components.FrameTypeImage)
+	frame.Src(src).SetPropType(components.FrameTypeImage)
 	if len(value) > 0 {
 		// Convert []string to []interface{} for SetValue
 		interfaceSlice := make([]interface{}, len(value[0]))

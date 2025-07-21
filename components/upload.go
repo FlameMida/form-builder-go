@@ -13,9 +13,11 @@ type Upload struct {
 
 // NewUpload creates a new upload component
 func NewUpload(field, title string) *Upload {
-	return &Upload{
+	upload := &Upload{
 		BaseComponent: NewBaseComponent(field, title),
 	}
+	upload.SetType("upload")
+	return upload
 }
 
 // Action sets the upload action URL
@@ -44,7 +46,7 @@ func (u *Upload) Data(data map[string]interface{}) *Upload {
 
 // Name sets the file field name
 func (u *Upload) Name(name string) *Upload {
-	u.SetProp("name", name)
+	u.SetName(name)
 	return u
 }
 

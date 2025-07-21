@@ -13,6 +13,20 @@ func main() {
 	fmt.Println("=== Go FormBuilder Elm Demo ===")
 
 	elm := factory.Elm{}
+	MenuName := "login_logo"
+	ul := elm.UploadFile(MenuName, "config.Info", "/adminapi/file/upload/1?type=1").
+		Name("file").Data(map[string]interface{}{
+		"menu_name": MenuName,
+	}).Headers(map[string]string{
+		"Authori-zation": "token",
+	}).
+		AppendRule("suffix", map[string]interface{}{
+			"type":  "div",
+			"class": "tips-info",
+			"domProps": map[string]any{
+				"innerHTML": "config.Desc",
+			},
+		}).Col(13)
 	cascader := elm.Cascader("menu_list", "父级id").Options([]components.CascaderOption{
 		{
 			Label:    "1",
@@ -43,38 +57,14 @@ func main() {
 		{Value: "3", Label: "永久期"},
 	})
 
-	svipNumberFor1 := elm.InputNumber("svip_number", "有效期（天）：").Required().Placeholder("请输入有效期（天）：").Min(0)
-
-	svipNumberFor2 := elm.InputNumber("svip_number", "有效期（天）：").Required().Placeholder("请输入有效期（天）：").Min(0)
-
 	svipNumber1Disabled := elm.Input("svip_number1", "有效期（天）：", "永久期").Placeholder("请输入有效期").Disabled(true)
 
 	svipNumberHidden := elm.Input("svip_number", "有效期（天）：", "永久期").Placeholder("请输入有效期").Hidden(true) // 设置为隐藏
 
 	// 添加控制规则 - 使用新的AddControls方法传入结构体切片
 	svipType.AddControls([]components.ControlRule{
-		{Value: "1", Rule: []contracts.Component{svipNumberFor1}},
-		{Value: "2", Rule: []contracts.Component{svipNumberFor2}},
 		{Value: "3", Rule: []contracts.Component{svipNumber1Disabled, svipNumberHidden}},
 	})
-
-	// 添加后缀元素
-	suffixElement := map[string]interface{}{
-		"type": "div",
-		"style": map[string]interface{}{
-			"color": "#999999",
-		},
-		"domProps": map[string]interface{}{
-			"innerHTML": "试用期每个用户只能购买一次，购买过付费会员之后将不在展示，不可购买",
-		},
-	}
-	svipType.AppendRule("suffix", suffixElement)
-
-	// Elm::number('cost_price', '原价：')->required()
-	costPrice := elm.InputNumber("cost_price", "原价：").Required().Placeholder("请输入原价：")
-
-	// Elm::number('price', '优惠价：')->required()
-	price := elm.InputNumber("price", "优惠价：").Required().Placeholder("请输入优惠价：")
 
 	// Elm::number('sort', '排序：')
 	sort := elm.InputNumber("sort", "排序：").Placeholder("请输入排序：")
@@ -85,12 +75,12 @@ func main() {
 	// === 创建表单 ===
 	api := "/save"
 	form, err := elm.CreateForm(api, []interface{}{
+		elm.FrameImage("album", "相册", "/upload.php?type=image", "").Height("500px").Col(12),
+		ul,
 		cascader,
 		sel,
 		svipName,
 		svipType,
-		costPrice,
-		price,
 		sort,
 		status,
 	}, map[string]interface{}{})

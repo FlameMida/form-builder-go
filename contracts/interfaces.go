@@ -13,6 +13,8 @@ type Component interface {
 	DoValidate() error
 	Validate(rule ValidateRule) ValidateComponent
 	Col(span int) Component
+	SetType(iType string) Component
+	SetName(name string) Component
 }
 
 // FormComponent represents a form input component

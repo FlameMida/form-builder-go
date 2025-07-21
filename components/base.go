@@ -17,6 +17,8 @@ type BaseComponent struct {
 	validateRules []contracts.ValidateRule
 	col           map[string]interface{}
 	appendedRules map[string]interface{}
+	iType         string
+	name          string
 }
 
 // NewBaseComponent creates a new base component
@@ -28,6 +30,8 @@ func NewBaseComponent(field, title string) *BaseComponent {
 		validateRules: make([]contracts.ValidateRule, 0),
 		col:           make(map[string]interface{}),
 		appendedRules: make(map[string]interface{}),
+		iType:         "",
+		name:          "",
 	}
 }
 
@@ -39,6 +43,16 @@ func (b *BaseComponent) Field() string {
 // Title returns the component title
 func (b *BaseComponent) Title() string {
 	return b.title
+}
+
+func (b *BaseComponent) SetType(iType string) contracts.Component {
+	b.iType = iType
+	return b
+}
+
+func (b *BaseComponent) SetName(name string) contracts.Component {
+	b.name = name
+	return b
 }
 
 // SetValue sets the component value
@@ -77,6 +91,14 @@ func (b *BaseComponent) Build() map[string]interface{} {
 
 	if len(b.col) > 0 {
 		result["col"] = b.col
+	}
+
+	if len(b.iType) > 0 {
+		result["type"] = b.iType
+	}
+
+	if len(b.name) > 0 {
+		result["name"] = b.name
 	}
 
 	for key, rule := range b.appendedRules {

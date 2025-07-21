@@ -25,11 +25,12 @@ func NewFrame(field, title string) *Frame {
 	frame.SetProp("type", FrameTypeInput)
 	frame.SetProp("maxLength", 0)
 	frame.Placeholder(fmt.Sprintf("请选择%s", title))
+	frame.SetType("frame")
 	return frame
 }
 
-// Type sets the frame type
-func (f *Frame) Type(frameType string) *Frame {
+// SetPropType sets the frame type
+func (f *Frame) SetPropType(frameType string) *Frame {
 	f.SetProp("type", frameType)
 	return f
 }

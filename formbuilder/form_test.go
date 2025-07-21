@@ -145,7 +145,7 @@ func TestFormBuilder(t *testing.T) {
 		require.NoError(t, err)
 
 		form.SetHeader("Authorization", "Bearer token").
-			SetHeader("Content-Type", "application/json")
+			SetHeader("Content-SetPropType", "application/json")
 
 		headersJSON, err := form.ParseHeaders()
 		require.NoError(t, err)
@@ -153,7 +153,7 @@ func TestFormBuilder(t *testing.T) {
 		headersStr := string(headersJSON)
 		assert.Contains(t, headersStr, "Authorization")
 		assert.Contains(t, headersStr, "Bearer token")
-		assert.Contains(t, headersStr, "Content-Type")
+		assert.Contains(t, headersStr, "Content-SetPropType")
 	})
 
 	t.Run("设置多个HTTP头", func(t *testing.T) {

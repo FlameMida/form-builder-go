@@ -52,7 +52,7 @@ func main() {
 	logo := elm.UploadImage("logo", "logo", "/upload.php")
 
 	//相册
-	album := elm.FrameImages("album", "相册", "/upload.php?type=image").Col(12).Height("500px")
+	album := elm.FrameImage("album", "相册", "/upload.php?type=image", "").Height("500px").Col(12)
 
 	// === 创建表单 ===
 	api := "/save"
