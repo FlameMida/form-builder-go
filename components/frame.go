@@ -52,18 +52,6 @@ func (f *Frame) Icon(icon string) *Frame {
 	return f
 }
 
-// Height sets the modal height
-func (f *Frame) Height(height string) *Frame {
-	f.SetProp("height", height)
-	return f
-}
-
-// Width sets the modal width
-func (f *Frame) Width(width string) *Frame {
-	f.SetProp("width", width)
-	return f
-}
-
 // Spin sets the loading spin status
 func (f *Frame) Spin(spin bool) *Frame {
 	f.SetProp("spin", spin)
@@ -91,12 +79,6 @@ func (f *Frame) HandleIcon(show bool) *Frame {
 // AllowRemove sets the remove button visibility
 func (f *Frame) AllowRemove(allow bool) *Frame {
 	f.SetProp("allowRemove", allow)
-	return f
-}
-
-// Icon sets the button icon
-func (f *Frame) Icon(icon string) *Frame {
-	f.SetProp("icon", icon)
 	return f
 }
 
