@@ -121,8 +121,59 @@ func (Elm) ColorPicker(field, title string, value ...string) *components.ColorPi
 }
 
 // Upload creates an ElementUI upload component
-func (Elm) Upload(field, title string, value ...string) *components.Upload {
+func (Elm) Upload(field, title, action string, value ...string) *components.Upload {
 	upload := components.NewUpload(field, title)
+	upload.Action(action)
+	if len(value) > 0 {
+		upload.SetValue(value[0])
+	}
+	return upload
+}
+
+// UploadImages creates an ElementUI image upload component for multiple images.
+func (e Elm) UploadImages(field, title, action string, value ...[]string) *components.Upload {
+	upload := components.NewUpload(field, title)
+	upload.Action(action).Accept("image/*").ListType("picture-card")
+	if len(value) > 0 {
+		// Convert []string to []interface{} for FileList
+		interfaceSlice := make([]interface{}, len(value[0]))
+		for i, v := range value[0] {
+			interfaceSlice[i] = v
+		}
+		upload.FileList(interfaceSlice)
+	}
+	return upload
+}
+
+// UploadFiles creates an ElementUI file upload component for multiple files.
+func (e Elm) UploadFiles(field, title, action string, value ...[]string) *components.Upload {
+	upload := components.NewUpload(field, title)
+	upload.Action(action)
+	if len(value) > 0 {
+		// Convert []string to []interface{} for FileList
+		interfaceSlice := make([]interface{}, len(value[0]))
+		for i, v := range value[0] {
+			interfaceSlice[i] = v
+		}
+		upload.FileList(interfaceSlice)
+	}
+	return upload
+}
+
+// UploadImage creates an ElementUI image upload component for a single image.
+func (e Elm) UploadImage(field, title, action string, value ...string) *components.Upload {
+	upload := components.NewUpload(field, title)
+	upload.Action(action).Accept("image/*").ListType("picture-card").Limit(1)
+	if len(value) > 0 {
+		upload.SetValue(value[0])
+	}
+	return upload
+}
+
+// UploadFile creates an ElementUI file upload component for a single file.
+func (e Elm) UploadFile(field, title, action string, value ...string) *components.Upload {
+	upload := components.NewUpload(field, title)
+	upload.Action(action).Limit(1)
 	if len(value) > 0 {
 		upload.SetValue(value[0])
 	}
@@ -163,6 +214,31 @@ func (Elm) Hidden(field string, value ...string) *components.Hidden {
 		hidden.SetValue(value[0])
 	}
 	return hidden
+}
+
+// Frame creates an ElementUI frame component.
+func (e Elm) Frame(field, title, src string, value ...interface{}) *components.Frame {
+	frame := components.NewFrame(field, title)
+	frame.Src(src)
+	if len(value) > 0 {
+		frame.SetValue(value[0])
+	}
+	return frame
+}
+
+// FrameImages creates an ElementUI image frame component for multiple images.
+func (e Elm) FrameImages(field, title, src string, value ...[]string) *components.Frame {
+	frame := components.NewFrame(field, title)
+	frame.Src(src).Type(components.FrameTypeImage)
+	if len(value) > 0 {
+		// Convert []string to []interface{} for SetValue
+		interfaceSlice := make([]interface{}, len(value[0]))
+		for i, v := range value[0] {
+			interfaceSlice[i] = v
+		}
+		frame.SetValue(interfaceSlice)
+	}
+	return frame
 }
 
 // Option creates an option for select components
@@ -315,8 +391,59 @@ func (Iview) ColorPicker(field, title string, value ...string) *components.Color
 }
 
 // Upload creates an IView upload component
-func (Iview) Upload(field, title string, value ...string) *components.Upload {
+func (Iview) Upload(field, title, action string, value ...string) *components.Upload {
 	upload := components.NewUpload(field, title)
+	upload.Action(action)
+	if len(value) > 0 {
+		upload.SetValue(value[0])
+	}
+	return upload
+}
+
+// UploadImages creates an IView image upload component for multiple images.
+func (i Iview) UploadImages(field, title, action string, value ...[]string) *components.Upload {
+	upload := components.NewUpload(field, title)
+	upload.Action(action).Accept("image/*").ListType("picture-card").Format([]string{"jpg", "jpeg", "png", "gif"})
+	if len(value) > 0 {
+		// Convert []string to []interface{} for FileList
+		interfaceSlice := make([]interface{}, len(value[0]))
+		for i, v := range value[0] {
+			interfaceSlice[i] = v
+		}
+		upload.FileList(interfaceSlice)
+	}
+	return upload
+}
+
+// UploadFiles creates an IView file upload component for multiple files.
+func (i Iview) UploadFiles(field, title, action string, value ...[]string) *components.Upload {
+	upload := components.NewUpload(field, title)
+	upload.Action(action)
+	if len(value) > 0 {
+		// Convert []string to []interface{} for FileList
+		interfaceSlice := make([]interface{}, len(value[0]))
+		for i, v := range value[0] {
+			interfaceSlice[i] = v
+		}
+		upload.FileList(interfaceSlice)
+	}
+	return upload
+}
+
+// UploadImage creates an IView image upload component for a single image.
+func (i Iview) UploadImage(field, title, action string, value ...string) *components.Upload {
+	upload := components.NewUpload(field, title)
+	upload.Action(action).Accept("image/*").ListType("picture-card").Limit(1).Format([]string{"jpg", "jpeg", "png", "gif"})
+	if len(value) > 0 {
+		upload.SetValue(value[0])
+	}
+	return upload
+}
+
+// UploadFile creates an IView file upload component for a single file.
+func (i Iview) UploadFile(field, title, action string, value ...string) *components.Upload {
+	upload := components.NewUpload(field, title)
+	upload.Action(action).Limit(1)
 	if len(value) > 0 {
 		upload.SetValue(value[0])
 	}
@@ -357,6 +484,31 @@ func (Iview) Hidden(field string, value ...string) *components.Hidden {
 		hidden.SetValue(value[0])
 	}
 	return hidden
+}
+
+// Frame creates an IView frame component.
+func (i Iview) Frame(field, title, src string, value ...interface{}) *components.Frame {
+	frame := components.NewFrame(field, title)
+	frame.Src(src)
+	if len(value) > 0 {
+		frame.SetValue(value[0])
+	}
+	return frame
+}
+
+// FrameImages creates an IView image frame component for multiple images.
+func (i Iview) FrameImages(field, title, src string, value ...[]string) *components.Frame {
+	frame := components.NewFrame(field, title)
+	frame.Src(src).Type(components.FrameTypeImage)
+	if len(value) > 0 {
+		// Convert []string to []interface{} for SetValue
+		interfaceSlice := make([]interface{}, len(value[0]))
+		for i, v := range value[0] {
+			interfaceSlice[i] = v
+		}
+		frame.SetValue(interfaceSlice)
+	}
+	return frame
 }
 
 // Option creates an option for select components

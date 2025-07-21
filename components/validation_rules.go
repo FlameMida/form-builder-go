@@ -52,7 +52,7 @@ func (r *ComponentRequiredRule) Message() string {
 // Validate validates that the value is not empty according to the validation type
 func (r *ComponentRequiredRule) Validate(value interface{}) error {
 	if value == nil {
-		return fmt.Errorf(r.message)
+		return fmt.Errorf("%s", r.message)
 	}
 
 	switch r.validationType {
@@ -61,29 +61,29 @@ func (r *ComponentRequiredRule) Validate(value interface{}) error {
 		switch v := value.(type) {
 		case []interface{}:
 			if len(v) == 0 {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		case []string:
 			if len(v) == 0 {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		case []int:
 			if len(v) == 0 {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		default:
-			return fmt.Errorf(r.message)
+			return fmt.Errorf("%s", r.message)
 		}
 	case "string":
 		// For string validation, value should be a non-empty string
 		switch v := value.(type) {
 		case string:
 			if strings.TrimSpace(v) == "" {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		default:
 			if v == "" || v == nil {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		}
 	case "number":
@@ -93,20 +93,20 @@ func (r *ComponentRequiredRule) Validate(value interface{}) error {
 			// Numbers are always valid if not nil
 		case string:
 			if strings.TrimSpace(v) == "" {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 			// Could add number parsing validation here if needed
 		default:
-			return fmt.Errorf(r.message)
+			return fmt.Errorf("%s", r.message)
 		}
 	default:
 		// Default to string validation
 		if v, ok := value.(string); ok {
 			if strings.TrimSpace(v) == "" {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		} else if value == "" || value == nil {
-			return fmt.Errorf(r.message)
+			return fmt.Errorf("%s", r.message)
 		}
 	}
 
@@ -154,7 +154,7 @@ func (r *ConditionalRequiredRule) Validate(value interface{}) error {
 	validationType := r.Type()
 
 	if value == nil {
-		return fmt.Errorf(r.message)
+		return fmt.Errorf("%s", r.message)
 	}
 
 	switch validationType {
@@ -162,28 +162,28 @@ func (r *ConditionalRequiredRule) Validate(value interface{}) error {
 		switch v := value.(type) {
 		case []interface{}:
 			if len(v) == 0 {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		case []string:
 			if len(v) == 0 {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		case []int:
 			if len(v) == 0 {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		default:
-			return fmt.Errorf(r.message)
+			return fmt.Errorf("%s", r.message)
 		}
 	case "string":
 		switch v := value.(type) {
 		case string:
 			if strings.TrimSpace(v) == "" {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		default:
 			if v == "" || v == nil {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		}
 	case "number":
@@ -192,19 +192,19 @@ func (r *ConditionalRequiredRule) Validate(value interface{}) error {
 			// Numbers are always valid if not nil
 		case string:
 			if strings.TrimSpace(v) == "" {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		default:
-			return fmt.Errorf(r.message)
+			return fmt.Errorf("%s", r.message)
 		}
 	default:
 		// Default to string validation
 		if v, ok := value.(string); ok {
 			if strings.TrimSpace(v) == "" {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		} else if value == "" || value == nil {
-			return fmt.Errorf(r.message)
+			return fmt.Errorf("%s", r.message)
 		}
 	}
 

@@ -46,13 +46,13 @@ func TestInput(t *testing.T) {
 
 		// 测试空值验证
 		input.SetValue("")
-		err := input.Validate()
+		err := input.DoValidate()
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "必填项")
+		assert.Contains(t, err.Error(), "请输入用户名")
 
 		// 测试有效值验证
 		input.SetValue("validuser")
-		err = input.Validate()
+		err = input.DoValidate()
 		assert.NoError(t, err)
 		assert.Equal(t, "validuser", input.GetValue())
 	})
@@ -123,12 +123,12 @@ func TestSwitch(t *testing.T) {
 
 		// 测试空值验证
 		switchComp.SetValue(nil)
-		err := switchComp.Validate()
+		err := switchComp.DoValidate()
 		assert.Error(t, err)
 
 		// 测试有效值验证
 		switchComp.SetValue(true)
-		err = switchComp.Validate()
+		err = switchComp.DoValidate()
 		assert.NoError(t, err)
 	})
 }
@@ -170,11 +170,11 @@ func TestBaseComponent(t *testing.T) {
 
 		// 验证功能
 		base.SetValue("")
-		err := base.Validate()
+		err := base.DoValidate()
 		assert.Error(t, err)
 
 		base.SetValue("有效值")
-		err = base.Validate()
+		err = base.DoValidate()
 		assert.NoError(t, err)
 	})
 }

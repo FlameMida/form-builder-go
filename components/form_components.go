@@ -134,13 +134,19 @@ func (s *Select) Build() map[string]interface{} {
 	// Override value based on multiple selection mode
 	if s.value == nil {
 		if s.isMultiple() {
-			result["value"] = []interface{}{} // Empty array for multiple selection
+			result["value"] = []interface{}{}
 		} else {
-			result["value"] = "" // Empty string for single selection
+			result["value"] = ""
 		}
 	}
 
 	return result
+}
+
+// AppendRule adds a rule to be appended to the component.
+func (s *Select) AppendRule(key string, rule map[string]interface{}) *Select {
+	s.BaseComponent.AppendRule(key, rule)
+	return s
 }
 
 // ControlRule represents a control rule for conditional rendering
@@ -149,19 +155,12 @@ type ControlRule struct {
 	Rule  []contracts.Component `json:"rule"`
 }
 
-// SuffixElement represents a suffix element
-type SuffixElement struct {
-	Type     string                 `json:"type"`
-	Style    map[string]interface{} `json:"style,omitempty"`
-	DomProps map[string]interface{} `json:"domProps,omitempty"`
-}
-
 // Radio component implementation
 type Radio struct {
 	*BaseComponent
 	options []contracts.Option
 	control []ControlRule
-	suffix  *SuffixElement
+	suffix  map[string]interface{}
 }
 
 // NewRadio creates a new radio component
@@ -217,9 +216,9 @@ func (r *Radio) AddControls(controlRules []ControlRule) *Radio {
 }
 
 // AppendRule adds a suffix element
-func (r *Radio) AppendRule(key string, element SuffixElement) *Radio {
+func (r *Radio) AppendRule(key string, element map[string]interface{}) *Radio {
 	if key == "suffix" {
-		r.suffix = &element
+		r.suffix = element
 	}
 	return r
 }
@@ -277,15 +276,7 @@ func (r *Radio) Build() map[string]interface{} {
 
 	// Add suffix if present
 	if r.suffix != nil {
-		result["suffix"] = map[string]interface{}{
-			"type": r.suffix.Type,
-		}
-		if r.suffix.Style != nil {
-			result["suffix"].(map[string]interface{})["style"] = r.suffix.Style
-		}
-		if r.suffix.DomProps != nil {
-			result["suffix"].(map[string]interface{})["domProps"] = r.suffix.DomProps
-		}
+		result["suffix"] = r.suffix
 	}
 
 	return result
@@ -740,7 +731,7 @@ func (r *SelectRequiredRule) Message() string {
 // Validate validates that the value is not empty
 func (r *SelectRequiredRule) Validate(value interface{}) error {
 	if value == nil {
-		return fmt.Errorf(r.message)
+		return fmt.Errorf("%s", r.message)
 	}
 
 	if r.isMultiple {
@@ -748,31 +739,31 @@ func (r *SelectRequiredRule) Validate(value interface{}) error {
 		switch v := value.(type) {
 		case []interface{}:
 			if len(v) == 0 {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		case []string:
 			if len(v) == 0 {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		case []int:
 			if len(v) == 0 {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		default:
-			return fmt.Errorf(r.message)
+			return fmt.Errorf("%s", r.message)
 		}
 	} else {
 		// For single selection, value should be a non-empty string or number
 		switch v := value.(type) {
 		case string:
 			if strings.TrimSpace(v) == "" {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		case int, float64:
 			// Numbers are always valid if not nil
 		default:
 			if v == "" || v == nil {
-				return fmt.Errorf(r.message)
+				return fmt.Errorf("%s", r.message)
 			}
 		}
 	}

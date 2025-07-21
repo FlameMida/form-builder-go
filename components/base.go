@@ -15,6 +15,8 @@ type BaseComponent struct {
 	value         interface{}
 	props         map[string]interface{}
 	validateRules []contracts.ValidateRule
+	col           map[string]interface{}
+	appendedRules map[string]interface{}
 }
 
 // NewBaseComponent creates a new base component
@@ -24,6 +26,8 @@ func NewBaseComponent(field, title string) *BaseComponent {
 		title:         title,
 		props:         make(map[string]interface{}),
 		validateRules: make([]contracts.ValidateRule, 0),
+		col:           make(map[string]interface{}),
+		appendedRules: make(map[string]interface{}),
 	}
 }
 
@@ -71,17 +75,31 @@ func (b *BaseComponent) Build() map[string]interface{} {
 		result["validate"] = rules
 	}
 
+	if len(b.col) > 0 {
+		result["col"] = b.col
+	}
+
+	for key, rule := range b.appendedRules {
+		result[key] = rule
+	}
+
 	return result
 }
 
-// Validate validates the component value
-func (b *BaseComponent) Validate() error {
+// DoValidate validates the component value
+func (b *BaseComponent) DoValidate() error {
 	for _, rule := range b.validateRules {
 		if err := rule.Validate(b.value); err != nil {
 			return fmt.Errorf("validation failed for field %s: %w", b.field, err)
 		}
 	}
 	return nil
+}
+
+// Validate adds a validation rule to the component.
+func (b *BaseComponent) Validate(rule contracts.ValidateRule) contracts.ValidateComponent {
+	b.validateRules = append(b.validateRules, rule)
+	return b
 }
 
 // AddValidateRule adds a validation rule
@@ -104,6 +122,18 @@ func (b *BaseComponent) SetProp(key string, value interface{}) *BaseComponent {
 // GetProp gets a component property
 func (b *BaseComponent) GetProp(key string) interface{} {
 	return b.props[key]
+}
+
+// Col sets the column layout for the component.
+func (b *BaseComponent) Col(span int) contracts.Component {
+	b.col = map[string]interface{}{"span": span}
+	return b
+}
+
+// AppendRule adds a rule to be appended to the component.
+func (b *BaseComponent) AppendRule(key string, rule map[string]interface{}) contracts.Component {
+	b.appendedRules[key] = rule
+	return b
 }
 
 // Input component implementation
@@ -203,6 +233,11 @@ func (i *Input) Build() map[string]interface{} {
 		delete(i.props, "hidden")
 	}
 
+	// Add appended rules
+	for key, rule := range i.appendedRules {
+		result[key] = rule
+	}
+
 	return result
 }
 
@@ -295,6 +330,12 @@ func (s *Switch) Build() map[string]interface{} {
 	result := s.BaseComponent.Build()
 	result["type"] = "el-switch"
 	return result
+}
+
+// AppendRule adds a rule to be appended to the component.
+func (s *Switch) AppendRule(key string, rule map[string]interface{}) *Switch {
+	s.BaseComponent.AppendRule(key, rule)
+	return s
 }
 
 // RequiredRule implements a required validation rule

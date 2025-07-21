@@ -10,7 +10,9 @@ type Component interface {
 	Build() map[string]interface{}
 	SetValue(value interface{}) Component
 	GetValue() interface{}
-	Validate() error
+	DoValidate() error
+	Validate(rule ValidateRule) ValidateComponent
+	Col(span int) Component
 }
 
 // FormComponent represents a form input component

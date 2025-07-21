@@ -24,10 +24,37 @@ func main() {
 	textarea := components.NewTextarea("goods_info", "商品简介")
 	textarea.Placeholder("请输入商品简介")
 	textarea.Rows(4)
+	textarea.AppendRule("suffix", map[string]interface{}{
+		"type": "div",
+		"style": map[string]interface{}{
+			"color": "#999999",
+		},
+		"domProps": map[string]interface{}{
+			"innerHTML": "这是一个后缀",
+		},
+	})
 
 	switchComp := components.NewSwitch("is_open", "是否开启")
 	switchComp.ActiveText("开启")
 	switchComp.InactiveText("关闭")
+	switchComp.AppendRule("suffix", map[string]interface{}{
+		"type": "div",
+		"style": map[string]interface{}{
+			"color": "#999999",
+		},
+		"domProps": map[string]interface{}{
+			"innerHTML": "这是一个后缀",
+		},
+	})
+	switchComp.AppendRule("suffix", map[string]interface{}{
+		"type": "div",
+		"style": map[string]interface{}{
+			"color": "#999999",
+		},
+		"domProps": map[string]interface{}{
+			"innerHTML": "这是一个后缀",
+		},
+	})
 
 	// 创建组件数组
 	components_list := []interface{}{input, textarea, switchComp}
@@ -78,12 +105,12 @@ func main() {
 
 	// 测试必填验证
 	input.SetValue("")
-	if err := input.Validate(); err != nil {
+	if err := input.DoValidate(); err != nil {
 		fmt.Printf("商品名称验证失败: %v\n", err)
 	}
 
 	input.SetValue("有效商品名称")
-	if err := input.Validate(); err != nil {
+	if err := input.DoValidate(); err != nil {
 		fmt.Printf("商品名称验证失败: %v\n", err)
 	} else {
 		fmt.Println("商品名称验证通过")

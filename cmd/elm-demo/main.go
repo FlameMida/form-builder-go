@@ -59,12 +59,12 @@ func main() {
 	})
 
 	// 添加后缀元素
-	suffixElement := components.SuffixElement{
-		Type: "div",
-		Style: map[string]interface{}{
+	suffixElement := map[string]interface{}{
+		"type": "div",
+		"style": map[string]interface{}{
 			"color": "#999999",
 		},
-		DomProps: map[string]interface{}{
+		"domProps": map[string]interface{}{
 			"innerHTML": "试用期每个用户只能购买一次，购买过付费会员之后将不在展示，不可购买",
 		},
 	}

@@ -48,6 +48,12 @@ func main() {
 	status.InactiveText("关")
 	status.ActiveText("开")
 
+	// 图片上传
+	logo := elm.UploadImage("logo", "logo", "/upload.php")
+
+	//相册
+	album := elm.FrameImages("album", "相册", "/upload.php?type=image").Col(12).Height("500px")
+
 	// === 创建表单 ===
 	api := "/save"
 	form, err := elm.CreateForm(api, []interface{}{
@@ -58,6 +64,8 @@ func main() {
 		price,
 		sort,
 		status,
+		logo,
+		album,
 	}, map[string]interface{}{})
 	if err != nil {
 		log.Fatalf("创建表单失败: %v", err)
