@@ -234,6 +234,7 @@ func (e Elm) Frame(field, title, src string, value ...interface{}) *components.F
 // FrameImage creates an ElementUI image frame component for multiple images.
 func (e Elm) FrameImage(field, title, src string, value ...string) *components.Frame {
 	frame := components.NewFrame(field, title)
+	frame.SetProp("maxLength", 1)
 	frame.Src(src).SetPropType(components.FrameTypeImage)
 	if len(value) > 0 {
 		frame.SetValue(value[0])
@@ -244,6 +245,7 @@ func (e Elm) FrameImage(field, title, src string, value ...string) *components.F
 // FrameImages creates an ElementUI image frame component for multiple images.
 func (e Elm) FrameImages(field, title, src string, value ...[]string) *components.Frame {
 	frame := components.NewFrame(field, title)
+	frame.SetProp("maxLength", 0)
 	frame.Src(src).SetPropType(components.FrameTypeImage)
 	if len(value) > 0 {
 		// Convert []string to []interface{} for SetValue
