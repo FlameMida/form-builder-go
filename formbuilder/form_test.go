@@ -7,6 +7,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/FlameMida/form-builder-go/components"
+	"github.com/FlameMida/form-builder-go/contracts"
+	formbuildererrors "github.com/FlameMida/form-builder-go/errors"
 	"github.com/FlameMida/form-builder-go/ui/elm"
 )
 
@@ -38,13 +40,17 @@ func TestFormBuilder(t *testing.T) {
 
 	t.Run("添加组件", func(t *testing.T) {
 		bootstrap := elm.NewBootstrap()
-		form, err := NewForm(bootstrap, "", []interface{}{}, map[string]interface{}{})
+		formBuilder, err := NewForm(bootstrap, "", []interface{}{}, map[string]interface{}{})
 		require.NoError(t, err)
 
 		input := components.NewInput("name", "姓名")
 		textarea := components.NewTextarea("desc", "描述")
 
-		form.Append(input).Append(textarea)
+		var form contracts.Form = formBuilder
+		form, err = form.Append(input)
+		require.NoError(t, err)
+		form, err = form.Append(textarea)
+		require.NoError(t, err)
 
 		rules := form.FormRule()
 		assert.Len(t, rules, 2)
@@ -55,11 +61,13 @@ func TestFormBuilder(t *testing.T) {
 	t.Run("前置添加组件", func(t *testing.T) {
 		bootstrap := elm.NewBootstrap()
 		input1 := components.NewInput("field1", "字段1")
-		form, err := NewForm(bootstrap, "", []interface{}{input1}, map[string]interface{}{})
+		formBuilder, err := NewForm(bootstrap, "", []interface{}{input1}, map[string]interface{}{})
 		require.NoError(t, err)
 
 		input2 := components.NewInput("field2", "字段2")
-		form.Prepend(input2)
+		var form contracts.Form = formBuilder
+		form, err = form.Prepend(input2)
+		require.NoError(t, err)
 
 		rules := form.FormRule()
 		assert.Len(t, rules, 2)
@@ -101,7 +109,13 @@ func TestFormBuilder(t *testing.T) {
 
 		_, err := NewForm(bootstrap, "", []interface{}{input1, input2}, map[string]interface{}{})
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "不能重复")
+
+		// 检查自定义错误类型
+		var fbErr *formbuildererrors.FormBuilderError
+		assert.ErrorAs(t, err, &fbErr)
+		assert.Equal(t, formbuildererrors.ErrTypeDuplicateField, fbErr.Type)
+		assert.Equal(t, "name", fbErr.Field)
+		assert.Contains(t, err.Error(), "name")
 	})
 
 	t.Run("生成JSON规则", func(t *testing.T) {
@@ -137,6 +151,51 @@ func TestFormBuilder(t *testing.T) {
 		jsonStr := string(jsonBytes)
 		assert.Contains(t, jsonStr, "submitBtn")
 		assert.Contains(t, jsonStr, "resetBtn")
+	})
+
+	t.Run("错误处理边界情况", func(t *testing.T) {
+		bootstrap := elm.NewBootstrap()
+		formBuilder, err := NewForm(bootstrap, "", []interface{}{}, map[string]interface{}{})
+		require.NoError(t, err)
+
+		// 测试添加重复字段应该失败
+		input1 := components.NewInput("duplicate", "字段1")
+		input2 := components.NewInput("duplicate", "字段2")
+
+		var form contracts.Form = formBuilder
+		form, err = form.Append(input1)
+		require.NoError(t, err)
+
+		// 第二次添加同名字段应该失败
+		_, err = form.Append(input2)
+		assert.Error(t, err)
+
+		var fbErr *formbuildererrors.FormBuilderError
+		assert.ErrorAs(t, err, &fbErr)
+		assert.Equal(t, formbuildererrors.ErrTypeDuplicateField, fbErr.Type)
+
+		// 表单状态应该保持一致（只有第一个组件）
+		rules := form.FormRule()
+		assert.Len(t, rules, 1)
+		assert.Equal(t, "duplicate", rules[0]["field"])
+	})
+
+	t.Run("设置规则错误处理", func(t *testing.T) {
+		bootstrap := elm.NewBootstrap()
+		form, err := NewForm(bootstrap, "", []interface{}{}, map[string]interface{}{})
+		require.NoError(t, err)
+
+		input1 := components.NewInput("field1", "字段1")
+		input2 := components.NewInput("field1", "字段2") // 重复字段
+
+		// SetRule 应该检测重复字段
+		_, err = form.SetRule([]contracts.Component{input1, input2})
+		assert.Error(t, err)
+
+		var fbErr *formbuildererrors.FormBuilderError
+		assert.ErrorAs(t, err, &fbErr)
+		assert.Equal(t, formbuildererrors.ErrTypeDuplicateField, fbErr.Type)
+		assert.Equal(t, "field1", fbErr.Field)
 	})
 
 	t.Run("设置HTTP头", func(t *testing.T) {

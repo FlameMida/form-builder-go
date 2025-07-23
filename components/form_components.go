@@ -236,7 +236,7 @@ func (r *Radio) Required() *Radio {
 }
 
 // Placeholder sets placeholder (not applicable for radio, but required by interface)
-func (r *Radio) Placeholder(text string) *Radio {
+func (r *Radio) Placeholder() *Radio {
 	return r
 }
 
@@ -342,7 +342,7 @@ func (c *Checkbox) Required() *Checkbox {
 }
 
 // Placeholder sets placeholder (not applicable for checkbox, but required by interface)
-func (c *Checkbox) Placeholder(text string) *Checkbox {
+func (c *Checkbox) Placeholder() *Checkbox {
 	return c
 }
 
@@ -551,7 +551,7 @@ func (s *Slider) Required() *Slider {
 }
 
 // Placeholder sets placeholder (not applicable for slider, but required by interface)
-func (s *Slider) Placeholder(text string) *Slider {
+func (s *Slider) Placeholder() *Slider {
 	return s
 }
 
@@ -691,7 +691,7 @@ func (r *Rate) Required() *Rate {
 }
 
 // Placeholder sets placeholder (not applicable for rate, but required by interface)
-func (r *Rate) Placeholder(text string) *Rate {
+func (r *Rate) Placeholder() *Rate {
 	return r
 }
 

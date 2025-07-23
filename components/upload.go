@@ -209,7 +209,7 @@ func (u *Upload) Required() contracts.FormComponent {
 }
 
 // Placeholder sets placeholder (not applicable for upload, but required by interface)
-func (u *Upload) Placeholder(text string) contracts.FormComponent {
+func (u *Upload) Placeholder(string) contracts.FormComponent {
 	return u
 }
 

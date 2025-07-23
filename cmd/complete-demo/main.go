@@ -86,6 +86,14 @@ func main() {
 		"status":      1,
 	})
 
+	// 示例：尝试添加重复字段（这会失败）
+	fmt.Println("\n=== 测试错误处理 ===")
+	duplicateInput := elm.Input("svip_name", "重复字段")
+	_, err = form.Append(duplicateInput)
+	if err != nil {
+		fmt.Printf("预期的错误（重复字段）: %v\n", err)
+	}
+
 	rule := form.FormRule()
 	action := form.GetAction()
 	method := form.GetMethod()

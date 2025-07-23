@@ -56,9 +56,9 @@ type ConfigInterface interface {
 
 // Form represents the main form builder
 type Form interface {
-	SetRule(rules []Component) Form
-	Append(component Component) Form
-	Prepend(component Component) Form
+	SetRule(rules []Component) (Form, error)
+	Append(component Component) (Form, error)
+	Prepend(component Component) (Form, error)
 	SetAction(action string) Form
 	GetAction() string
 	SetMethod(method string) Form

@@ -349,7 +349,7 @@ func (t *Tree) Required() contracts.FormComponent {
 }
 
 // Placeholder sets placeholder (not applicable for tree, but required by interface)
-func (t *Tree) Placeholder(text string) contracts.FormComponent {
+func (t *Tree) Placeholder(string) contracts.FormComponent {
 	return t
 }
 
@@ -457,7 +457,7 @@ func (b *Button) Required() contracts.FormComponent {
 }
 
 // Placeholder sets placeholder (not applicable for button, but required by interface)
-func (b *Button) Placeholder(text string) contracts.FormComponent {
+func (b *Button) Placeholder(string) contracts.FormComponent {
 	return b
 }
 
@@ -492,12 +492,12 @@ func (h *Hidden) Required() contracts.FormComponent {
 }
 
 // Placeholder sets placeholder (not applicable for hidden, but required by interface)
-func (h *Hidden) Placeholder(text string) contracts.FormComponent {
+func (h *Hidden) Placeholder(string) contracts.FormComponent {
 	return h
 }
 
 // Disabled sets the disabled state (not applicable for hidden)
-func (h *Hidden) Disabled(disabled bool) contracts.FormComponent {
+func (h *Hidden) Disabled(bool) contracts.FormComponent {
 	return h
 }
 

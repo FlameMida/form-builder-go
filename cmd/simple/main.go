@@ -57,7 +57,7 @@ func main() {
 	})
 
 	// 创建组件数组
-	components_list := []interface{}{input, textarea, switchComp}
+	componentsList := []interface{}{input, textarea, switchComp}
 
 	// 创建表单配置
 	config := map[string]interface{}{
@@ -70,7 +70,7 @@ func main() {
 	}
 
 	// 创建表单
-	form, err := formbuilder.NewForm(bootstrap, "/save", components_list, config)
+	form, err := formbuilder.NewForm(bootstrap, "/save", componentsList, config)
 	if err != nil {
 		log.Fatalf("创建表单失败: %v", err)
 	}

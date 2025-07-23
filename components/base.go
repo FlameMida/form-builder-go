@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/FlameMida/form-builder-go/contracts"
+	formbuildererrors "github.com/FlameMida/form-builder-go/errors"
 )
 
 // BaseComponent provides common functionality for all components
@@ -21,15 +22,15 @@ type BaseComponent struct {
 	name          string
 }
 
-// NewBaseComponent creates a new base component
+// NewBaseComponent creates a new base component with optimized memory allocation
 func NewBaseComponent(field, title string) *BaseComponent {
 	return &BaseComponent{
 		field:         field,
 		title:         title,
-		props:         make(map[string]interface{}),
-		validateRules: make([]contracts.ValidateRule, 0),
-		col:           make(map[string]interface{}),
-		appendedRules: make(map[string]interface{}),
+		props:         make(map[string]interface{}, 8),      // Pre-allocate reasonable capacity
+		validateRules: make([]contracts.ValidateRule, 0, 4), // Pre-allocate for common cases
+		col:           make(map[string]interface{}, 4),      // Pre-allocate reasonable capacity
+		appendedRules: make(map[string]interface{}, 4),      // Pre-allocate reasonable capacity
 		iType:         "",
 		name:          "",
 	}
@@ -66,13 +67,15 @@ func (b *BaseComponent) GetValue() interface{} {
 	return b.value
 }
 
-// Build returns the component as a map for JSON serialization
+// Build returns the component as a map for JSON serialization (optimized for memory efficiency)
 func (b *BaseComponent) Build() map[string]interface{} {
-	result := map[string]interface{}{
-		"field": b.field,
-		"title": b.title,
-		"props": b.props,
-	}
+	// Pre-allocate result map with estimated capacity to reduce allocations
+	result := make(map[string]interface{}, 8+len(b.appendedRules))
+
+	// Set core fields
+	result["field"] = b.field
+	result["title"] = b.title
+	result["props"] = b.props
 
 	// 始终包含value字段，如果没有设置则为空字符串（匹配PHP格式）
 	if b.value != nil {
@@ -82,9 +85,10 @@ func (b *BaseComponent) Build() map[string]interface{} {
 	}
 
 	if len(b.validateRules) > 0 {
-		rules := make([]map[string]interface{}, len(b.validateRules))
-		for i, rule := range b.validateRules {
-			rules[i] = rule.ToMap()
+		// Pre-allocate validation rules slice
+		rules := make([]map[string]interface{}, 0, len(b.validateRules))
+		for _, rule := range b.validateRules {
+			rules = append(rules, rule.ToMap())
 		}
 		result["validate"] = rules
 	}
@@ -101,6 +105,7 @@ func (b *BaseComponent) Build() map[string]interface{} {
 		result["name"] = b.name
 	}
 
+	// Add appended rules
 	for key, rule := range b.appendedRules {
 		result[key] = rule
 	}
@@ -112,7 +117,7 @@ func (b *BaseComponent) Build() map[string]interface{} {
 func (b *BaseComponent) DoValidate() error {
 	for _, rule := range b.validateRules {
 		if err := rule.Validate(b.value); err != nil {
-			return fmt.Errorf("validation failed for field %s: %w", b.field, err)
+			return formbuildererrors.NewValidationError(b.field, rule.Message(), err)
 		}
 	}
 	return nil
@@ -337,7 +342,7 @@ func (s *Switch) Required() *Switch {
 }
 
 // Placeholder sets placeholder (not applicable for switch, but required by interface)
-func (s *Switch) Placeholder(text string) *Switch {
+func (s *Switch) Placeholder() *Switch {
 	return s
 }
 

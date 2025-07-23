@@ -34,7 +34,7 @@ func NewBootstrapV4() *Bootstrap {
 }
 
 // Init initializes the bootstrap with a form
-func (b *Bootstrap) Init(form contracts.Form) error {
+func (b *Bootstrap) Init(contracts.Form) error {
 	// IView specific initialization
 	return nil
 }

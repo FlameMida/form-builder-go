@@ -347,7 +347,7 @@ func (c *ColorPicker) Required() contracts.FormComponent {
 }
 
 // Placeholder sets placeholder (not applicable for color picker, but required by interface)
-func (c *ColorPicker) Placeholder(text string) contracts.FormComponent {
+func (c *ColorPicker) Placeholder(string) contracts.FormComponent {
 	return c
 }
 

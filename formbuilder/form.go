@@ -2,11 +2,12 @@ package formbuilder
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/FlameMida/form-builder-go/contracts"
+	"github.com/FlameMida/form-builder-go/errors"
 )
 
 // FormBuilder represents the main form builder
@@ -22,29 +23,36 @@ type FormBuilder struct {
 	formContentType string
 	dependScript    []string
 	template        string
+	
+	// Performance optimization fields
+	mu               sync.RWMutex // Protects cache fields
+	cachedFormRule   []byte       // Cached JSON for FormRule
+	cachedFormConfig []byte       // Cached JSON for FormConfig
+	cacheValid       bool         // Whether cache is valid
 }
 
-// NewForm creates a new form with the specified UI bootstrap
+// NewForm creates a new form with the specified UI bootstrap (optimized for memory efficiency)
 func NewForm(ui contracts.BootstrapInterface, action string, rules []interface{}, config map[string]interface{}) (*FormBuilder, error) {
-	// Convert []interface{} to []contracts.Component
-	components := make([]contracts.Component, len(rules))
+	// Pre-allocate components slice with exact capacity to avoid reallocations
+	components := make([]contracts.Component, 0, len(rules))
 	for i, rule := range rules {
 		if comp, ok := rule.(contracts.Component); ok {
-			components[i] = comp
+			components = append(components, comp)
 		} else {
 			return nil, fmt.Errorf("rule at index %d does not implement Component interface", i)
 		}
 	}
 
+	// Pre-allocate maps with estimated capacity
 	form := &FormBuilder{
 		action:          action,
 		method:          "POST",
 		title:           "", // 默认为空
 		rules:           components,
-		formData:        make(map[string]interface{}),
+		formData:        make(map[string]interface{}, 16), // Pre-allocate reasonable capacity
 		config:          config,
 		ui:              ui,
-		headers:         make(map[string]string),
+		headers:         make(map[string]string, 8),      // Pre-allocate reasonable capacity
 		formContentType: "application/x-www-form-urlencoded",
 		dependScript: []string{
 			`<script src="https://unpkg.com/jquery@3.3.1/dist/jquery.min.js"></script>`,
@@ -52,6 +60,7 @@ func NewForm(ui contracts.BootstrapInterface, action string, rules []interface{}
 			`<script src="https://unpkg.com/@form-create/data@1.0.0/dist/province_city.js"></script>`,
 			`<script src="https://unpkg.com/@form-create/data@1.0.0/dist/province_city_area.js"></script>`,
 		},
+		cacheValid: false, // Initialize cache as invalid
 	}
 
 	if err := ui.Init(form); err != nil {
@@ -65,31 +74,61 @@ func NewForm(ui contracts.BootstrapInterface, action string, rules []interface{}
 	return form, nil
 }
 
-// SetRule sets the form rules
-func (f *FormBuilder) SetRule(rules []contracts.Component) contracts.Form {
+// invalidateCache marks the cache as invalid (should be called when form structure changes)
+func (f *FormBuilder) invalidateCache() {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.invalidateCacheUnsafe()
+}
+
+// invalidateCacheUnsafe is the non-locking version of invalidateCache
+func (f *FormBuilder) invalidateCacheUnsafe() {
+	f.cacheValid = false
+	f.cachedFormRule = nil
+	f.cachedFormConfig = nil
+}
+
+// SetRule sets the form rules (thread-safe)
+func (f *FormBuilder) SetRule(rules []contracts.Component) (contracts.Form, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	
 	f.rules = rules
-	if err := f.checkFieldUnique(); err != nil {
-		panic(err) // In production, handle this more gracefully
+	if err := f.checkFieldUniqueUnsafe(); err != nil {
+		return nil, err
 	}
-	return f
+	f.invalidateCacheUnsafe()
+	return f, nil
 }
 
-// Append adds a component to the end of the form
-func (f *FormBuilder) Append(component contracts.Component) contracts.Form {
+// Append adds a component to the end of the form (thread-safe)
+func (f *FormBuilder) Append(component contracts.Component) (contracts.Form, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	
 	f.rules = append(f.rules, component)
-	if err := f.checkFieldUnique(); err != nil {
-		panic(err) // In production, handle this more gracefully
+	if err := f.checkFieldUniqueUnsafe(); err != nil {
+		// Remove the component that was just added to maintain consistency
+		f.rules = f.rules[:len(f.rules)-1]
+		return nil, err
 	}
-	return f
+	f.invalidateCacheUnsafe()
+	return f, nil
 }
 
-// Prepend adds a component to the beginning of the form
-func (f *FormBuilder) Prepend(component contracts.Component) contracts.Form {
+// Prepend adds a component to the beginning of the form (thread-safe)
+func (f *FormBuilder) Prepend(component contracts.Component) (contracts.Form, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	
 	f.rules = append([]contracts.Component{component}, f.rules...)
-	if err := f.checkFieldUnique(); err != nil {
-		panic(err) // In production, handle this more gracefully
+	if err := f.checkFieldUniqueUnsafe(); err != nil {
+		// Remove the component that was just prepended to maintain consistency
+		f.rules = f.rules[1:]
+		return nil, err
 	}
-	return f
+	f.invalidateCacheUnsafe()
+	return f, nil
 }
 
 // SetAction sets the form action URL
@@ -125,15 +164,21 @@ func (f *FormBuilder) GetTitle() string {
 	return f.title
 }
 
-// FormData sets multiple form field values
+// FormData sets multiple form field values (thread-safe)
 func (f *FormBuilder) FormData(data map[string]interface{}) contracts.Form {
+	f.mu.Lock()
+	defer f.mu.Unlock()
 	f.formData = data
+	f.invalidateCacheUnsafe() // Form data changes invalidate rule cache
 	return f
 }
 
-// SetValue sets a single form field value
+// SetValue sets a single form field value (thread-safe)
 func (f *FormBuilder) SetValue(field string, value interface{}) contracts.Form {
+	f.mu.Lock()
+	defer f.mu.Unlock()
 	f.formData[field] = value
+	f.invalidateCacheUnsafe() // Form data changes invalidate rule cache
 	return f
 }
 
@@ -161,28 +206,72 @@ func (f *FormBuilder) SetDependScript(scripts []string) *FormBuilder {
 	return f
 }
 
-// FormRule returns the form rules as a slice of maps
+// FormRule returns the form rules as a slice of maps (with memory optimization and concurrency safety)
 func (f *FormBuilder) FormRule() []map[string]interface{} {
-	rules := make([]map[string]interface{}, len(f.rules))
-	for i, rule := range f.rules {
-		rules[i] = f.parseFormComponent(rule)
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+	
+	// Pre-allocate slice with known capacity to avoid reallocations
+	rules := make([]map[string]interface{}, 0, len(f.rules))
+	for _, rule := range f.rules {
+		rules = append(rules, f.parseFormComponent(rule))
 	}
 	return f.deepSetFormData(f.formData, rules)
 }
 
-// FormConfig returns the form configuration
+// FormConfig returns the form configuration (thread-safe)
 func (f *FormBuilder) FormConfig() map[string]interface{} {
+	f.mu.RLock()
+	defer f.mu.RUnlock()
 	return f.config
 }
 
-// ParseFormRule returns the JSON representation of form rules
+// ParseFormRule returns the JSON representation of form rules with caching
 func (f *FormBuilder) ParseFormRule() ([]byte, error) {
-	return json.Marshal(f.FormRule())
+	f.mu.RLock()
+	if f.cacheValid && f.cachedFormRule != nil {
+		defer f.mu.RUnlock()
+		return f.cachedFormRule, nil
+	}
+	f.mu.RUnlock()
+	
+	// Generate fresh JSON
+	data, err := json.Marshal(f.FormRule())
+	if err != nil {
+		return nil, err
+	}
+	
+	// Cache the result
+	f.mu.Lock()
+	f.cachedFormRule = data
+	f.cacheValid = true
+	f.mu.Unlock()
+	
+	return data, nil
 }
 
-// ParseFormConfig returns the JSON representation of form config
+// ParseFormConfig returns the JSON representation of form config with caching
 func (f *FormBuilder) ParseFormConfig() ([]byte, error) {
-	return json.Marshal(f.FormConfig())
+	f.mu.RLock()
+	if f.cacheValid && f.cachedFormConfig != nil {
+		defer f.mu.RUnlock()
+		return f.cachedFormConfig, nil
+	}
+	f.mu.RUnlock()
+	
+	// Generate fresh JSON
+	data, err := json.Marshal(f.FormConfig())
+	if err != nil {
+		return nil, err
+	}
+	
+	// Cache the result
+	f.mu.Lock()
+	f.cachedFormConfig = data
+	f.cacheValid = true
+	f.mu.Unlock()
+	
+	return data, nil
 }
 
 // ParseHeaders returns the JSON representation of headers
@@ -202,20 +291,29 @@ func (f *FormBuilder) View() (string, error) {
 	return f.renderTemplate()
 }
 
-// checkFieldUnique ensures all field names are unique
+// checkFieldUnique ensures all field names are unique using O(n) algorithm
 func (f *FormBuilder) checkFieldUnique() error {
-	return f.checkFieldUniqueRecursive(f.rules, make(map[string]bool))
+	f.mu.RLock()
+	defer f.mu.RUnlock()
+	return f.checkFieldUniqueUnsafe()
 }
 
-// checkFieldUniqueRecursive recursively checks field uniqueness
-func (f *FormBuilder) checkFieldUniqueRecursive(rules []contracts.Component, fields map[string]bool) error {
-	for _, rule := range rules {
+// checkFieldUniqueUnsafe is the non-locking version of checkFieldUnique
+func (f *FormBuilder) checkFieldUniqueUnsafe() error {
+	if len(f.rules) == 0 {
+		return nil
+	}
+	
+	// Pre-allocate map with estimated capacity to reduce allocations
+	fields := make(map[string]bool, len(f.rules))
+	
+	for _, rule := range f.rules {
 		field := rule.Field()
 		if field == "" {
 			continue
 		}
 		if fields[field] {
-			return errors.New("组件的 field 不能重复")
+			return errors.NewDuplicateFieldError(field)
 		}
 		fields[field] = true
 	}
@@ -227,19 +325,19 @@ func (f *FormBuilder) parseFormComponent(component contracts.Component) map[stri
 	return f.ui.ParseComponent(component)
 }
 
-// deepSetFormData recursively sets form data values
+// deepSetFormData recursively sets form data values (optimized for memory efficiency)
 func (f *FormBuilder) deepSetFormData(formData map[string]interface{}, rules []map[string]interface{}) []map[string]interface{} {
 	if len(formData) == 0 {
 		return rules
 	}
 
-	for i, rule := range rules {
-		if field, ok := rule["field"].(string); ok {
+	// Optimize: modify rules in place instead of creating new maps
+	for i := range rules {
+		if field, ok := rules[i]["field"].(string); ok {
 			if value, exists := formData[field]; exists {
-				rule["value"] = value
+				rules[i]["value"] = value
 			}
 		}
-		rules[i] = rule
 	}
 
 	return rules
