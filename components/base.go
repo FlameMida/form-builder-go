@@ -20,6 +20,7 @@ type BaseComponent struct {
 	appendedRules map[string]interface{}
 	iType         string
 	name          string
+	style         interface{} // Component style (can be string or map)
 }
 
 // NewBaseComponent creates a new base component with optimized memory allocation
@@ -105,6 +106,10 @@ func (b *BaseComponent) Build() map[string]interface{} {
 		result["name"] = b.name
 	}
 
+	if b.style != nil {
+		result["style"] = b.style
+	}
+
 	// Add appended rules
 	for key, rule := range b.appendedRules {
 		result[key] = rule
@@ -152,9 +157,37 @@ func (b *BaseComponent) GetProp(key string) interface{} {
 }
 
 // Col sets the column layout for the component.
-func (b *BaseComponent) Col(span int) contracts.Component {
-	b.col = map[string]interface{}{"span": span}
+// Supports both integer span and map[string]interface{} for advanced layout.
+func (b *BaseComponent) Col(col interface{}) contracts.Component {
+	switch v := col.(type) {
+	case int:
+		// Integer input: convert to {span: value}
+		b.col = map[string]interface{}{"span": v}
+	case map[string]interface{}:
+		// Map input: use directly (merge with existing if needed)
+		if len(b.col) == 0 {
+			b.col = make(map[string]interface{}, len(v))
+		}
+		for key, value := range v {
+			b.col[key] = value
+		}
+	default:
+		// Fallback: treat as span value
+		b.col = map[string]interface{}{"span": col}
+	}
 	return b
+}
+
+// Style sets the component style.
+// Supports both string and map[string]interface{} for flexible styling.
+func (b *BaseComponent) Style(style interface{}) contracts.Component {
+	b.style = style
+	return b
+}
+
+// GetStyle returns the component style.
+func (b *BaseComponent) GetStyle() interface{} {
+	return b.style
 }
 
 // AppendRule adds a rule to be appended to the component.
@@ -245,6 +278,12 @@ func (i *Input) Hidden(hidden bool) *Input {
 	if hidden {
 		i.SetProp("hidden", true)
 	}
+	return i
+}
+
+// Rows sets the number of rows (for textarea type inputs)
+func (i *Input) Rows(rows int) *Input {
+	i.SetProp("rows", rows)
 	return i
 }
 

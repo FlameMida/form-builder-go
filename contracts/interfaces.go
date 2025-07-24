@@ -12,9 +12,10 @@ type Component interface {
 	GetValue() interface{}
 	DoValidate() error
 	Validate(rule ValidateRule) ValidateComponent
-	Col(span int) Component
+	Col(col interface{}) Component
 	SetType(iType string) Component
 	SetName(name string) Component
+	Style(style interface{}) Component
 }
 
 // FormComponent represents a form input component
