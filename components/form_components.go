@@ -246,6 +246,12 @@ func (r *Radio) Disabled(disabled bool) *Radio {
 	return r
 }
 
+// Col sets the column layout for the component (override to return Radio type)
+func (r *Radio) Col(col interface{}) *Radio {
+	r.BaseComponent.Col(col)
+	return r
+}
+
 // Build returns the radio component as a map
 func (r *Radio) Build() map[string]interface{} {
 	result := r.BaseComponent.Build()
