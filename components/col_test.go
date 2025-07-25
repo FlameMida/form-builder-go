@@ -2,6 +2,7 @@ package components
 
 import (
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestColMethod(t *testing.T) {

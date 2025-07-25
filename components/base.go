@@ -158,7 +158,7 @@ func (b *BaseComponent) GetProp(key string) interface{} {
 
 // Col sets the column layout for the component.
 // Supports both integer span and map[string]interface{} for advanced layout.
-func (b *BaseComponent) Col(col interface{}) contracts.Component {
+func (b *BaseComponent) Col(col interface{}) *BaseComponent {
 	switch v := col.(type) {
 	case int:
 		// Integer input: convert to {span: value}
@@ -188,6 +188,11 @@ func (b *BaseComponent) Style(style interface{}) contracts.Component {
 // GetStyle returns the component style.
 func (b *BaseComponent) GetStyle() interface{} {
 	return b.style
+}
+
+// AsComponent returns the component as a Component interface for compatibility
+func (b *BaseComponent) AsComponent() contracts.Component {
+	return b
 }
 
 // AppendRule adds a rule to be appended to the component.
@@ -287,6 +292,17 @@ func (i *Input) Rows(rows int) *Input {
 	return i
 }
 
+// Col sets the column layout for the component
+func (i *Input) Col(col interface{}) *Input {
+	i.BaseComponent.Col(col)
+	return i
+}
+
+// AsComponent returns the component as a Component interface for compatibility
+func (i *Input) AsComponent() contracts.Component {
+	return i
+}
+
 // Build returns the input component as a map
 func (i *Input) Build() map[string]interface{} {
 	result := i.BaseComponent.Build()
@@ -325,6 +341,29 @@ func NewTextarea(field, title string) *Textarea {
 // Rows sets the number of rows
 func (t *Textarea) Rows(rows int) *Textarea {
 	t.SetProp("rows", rows)
+	return t
+}
+
+// Col sets the column layout for the component
+func (t *Textarea) Col(col interface{}) *Textarea {
+	t.BaseComponent.Col(col)
+	return t
+}
+
+// AsComponent returns the component as a Component interface for compatibility
+func (t *Textarea) AsComponent() contracts.Component {
+	return t
+}
+
+// Placeholder sets the placeholder text (override to return Textarea type for chaining)
+func (t *Textarea) Placeholder(text string) *Textarea {
+	t.SetProp("placeholder", text)
+	return t
+}
+
+// Required makes the textarea required (override to return Textarea type for chaining)
+func (t *Textarea) Required() *Textarea {
+	t.AddValidateRule(NewStringRequiredRule(fmt.Sprintf("请输入%s", t.title)))
 	return t
 }
 
@@ -388,6 +427,17 @@ func (s *Switch) Placeholder() *Switch {
 // Disabled sets the disabled state
 func (s *Switch) Disabled(disabled bool) *Switch {
 	s.SetProp("disabled", disabled)
+	return s
+}
+
+// Col sets the column layout for the component
+func (s *Switch) Col(col interface{}) *Switch {
+	s.BaseComponent.Col(col)
+	return s
+}
+
+// AsComponent returns the component as a Component interface for compatibility
+func (s *Switch) AsComponent() contracts.Component {
 	return s
 }
 

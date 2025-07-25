@@ -121,6 +121,17 @@ func (s *Select) Disabled(disabled bool) *Select {
 	return s
 }
 
+// Col sets the column layout for the component
+func (s *Select) Col(col interface{}) *Select {
+	s.BaseComponent.Col(col)
+	return s
+}
+
+// AsComponent returns the component as a Component interface for compatibility
+func (s *Select) AsComponent() contracts.Component {
+	return s
+}
+
 // Build returns the select component as a map
 func (s *Select) Build() map[string]interface{} {
 	result := s.BaseComponent.Build()
@@ -246,9 +257,14 @@ func (r *Radio) Disabled(disabled bool) *Radio {
 	return r
 }
 
-// Col sets the column layout for the component (override to return Radio type)
+// Col sets the column layout for the component
 func (r *Radio) Col(col interface{}) *Radio {
 	r.BaseComponent.Col(col)
+	return r
+}
+
+// AsComponent returns the component as a Component interface for compatibility
+func (r *Radio) AsComponent() contracts.Component {
 	return r
 }
 
@@ -358,6 +374,17 @@ func (c *Checkbox) Disabled(disabled bool) *Checkbox {
 	return c
 }
 
+// Col sets the column layout for the component
+func (c *Checkbox) Col(col interface{}) *Checkbox {
+	c.BaseComponent.Col(col)
+	return c
+}
+
+// AsComponent returns the component as a Component interface for compatibility
+func (c *Checkbox) AsComponent() contracts.Component {
+	return c
+}
+
 // Build returns the checkbox component as a map
 func (c *Checkbox) Build() map[string]interface{} {
 	result := c.BaseComponent.Build()
@@ -454,6 +481,17 @@ func (i *InputNumber) Placeholder(text string) *InputNumber {
 // Disabled sets the disabled state
 func (i *InputNumber) Disabled(disabled bool) *InputNumber {
 	i.SetProp("disabled", disabled)
+	return i
+}
+
+// Col sets the column layout for the component
+func (i *InputNumber) Col(col interface{}) *InputNumber {
+	i.BaseComponent.Col(col)
+	return i
+}
+
+// AsComponent returns the component as a Component interface for compatibility
+func (i *InputNumber) AsComponent() contracts.Component {
 	return i
 }
 
@@ -564,6 +602,17 @@ func (s *Slider) Placeholder() *Slider {
 // Disabled sets the disabled state
 func (s *Slider) Disabled(disabled bool) *Slider {
 	s.SetProp("disabled", disabled)
+	return s
+}
+
+// Col sets the column layout for the component
+func (s *Slider) Col(col interface{}) *Slider {
+	s.BaseComponent.Col(col)
+	return s
+}
+
+// AsComponent returns the component as a Component interface for compatibility
+func (s *Slider) AsComponent() contracts.Component {
 	return s
 }
 
@@ -704,6 +753,17 @@ func (r *Rate) Placeholder() *Rate {
 // Disabled sets the disabled state
 func (r *Rate) Disabled(disabled bool) *Rate {
 	r.SetProp("disabled", disabled)
+	return r
+}
+
+// Col sets the column layout for the component
+func (r *Rate) Col(col interface{}) *Rate {
+	r.BaseComponent.Col(col)
+	return r
+}
+
+// AsComponent returns the component as a Component interface for compatibility
+func (r *Rate) AsComponent() contracts.Component {
 	return r
 }
 

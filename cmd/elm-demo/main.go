@@ -19,14 +19,13 @@ func main() {
 		"menu_name": MenuName,
 	}).Headers(map[string]string{
 		"Authori-zation": "token",
-	}).
-		AppendRule("suffix", map[string]interface{}{
-			"type":  "div",
-			"class": "tips-info",
-			"domProps": map[string]any{
-				"innerHTML": "config.Desc",
-			},
-		}).Col(13)
+	}).AppendRule("suffix", map[string]interface{}{
+		"type":  "div",
+		"class": "tips-info",
+		"domProps": map[string]any{
+			"innerHTML": "config.Desc",
+		},
+	})
 	cascader := elm.Cascader("menu_list", "父级id").Options([]components.CascaderOption{
 		{
 			Label:    "1",
@@ -49,7 +48,7 @@ func main() {
 	// ->setOptions([...])
 	// ->control([...])
 	// ->appendRule('suffix', [...])
-	svipType := elm.Radio("svip_type", "会员类别：", "2") // 直接在构造函数中设置默认值
+	svipType := elm.Radio("svip_type", "会员类别：", "2").Col(13) // 直接在构造函数中设置默认值
 	// 使用新的AddOptions方法传入结构体切片
 	svipType.AddOptions([]contracts.Option{
 		{Value: "1", Label: "试用期"},

@@ -6,17 +6,42 @@ import (
 	"testing"
 )
 
-func TestRadioChainedCalls(t *testing.T) {
-	t.Run("Radio链式调用测试", func(t *testing.T) {
+func TestRadioComponentInterface(t *testing.T) {
+	t.Run("Radio正确实现Component接口", func(t *testing.T) {
 		radio := NewRadio("gender", "性别")
 
-		// 测试链式调用是否正常工作
-		radio.Col(12).
-			AddOption("male", "男性").
-			AddOption("female", "女性").
-			Required().
-			Size("large").
-			Disabled(false)
+		// 验证Radio可以被转换为Component接口
+		var component contracts.Component = radio.AsComponent()
+		assert.NotNil(t, component, "Radio应该实现Component接口")
+
+		// 验证Component接口的所有方法都可以调用
+		assert.Equal(t, "gender", component.Field())
+		assert.Equal(t, "性别", component.Title())
+
+		// 测试SetValue和GetValue
+		component.SetValue("male")
+		assert.Equal(t, "male", component.GetValue())
+
+		// 直接验证Col设置生效（使用具体类型）
+		radio.Col(12)
+		buildResult := component.Build()
+		col, exists := buildResult["col"]
+		assert.True(t, exists, "col字段应该存在")
+		colMap, ok := col.(map[string]interface{})
+		assert.True(t, ok, "col应该是map类型")
+		assert.Equal(t, 12, colMap["span"], "span值应该是12")
+	})
+
+	t.Run("Radio分步设置功能测试", func(t *testing.T) {
+		radio := NewRadio("gender", "性别")
+
+		// 分步设置所有属性
+		radio.AddOption("male", "男性")
+		radio.AddOption("female", "女性")
+		radio.Required()
+		radio.Size("large")
+		radio.Disabled(false)
+		radio.Col(12)
 
 		result := radio.Build()
 
@@ -94,5 +119,21 @@ func TestRadioChainedCalls(t *testing.T) {
 
 		// Col配置应该相同
 		assert.Equal(t, inputResult["col"], radioResult["col"], "Radio和Input的col配置应该一致")
+	})
+
+	t.Run("Radio在FormBuilder中的使用", func(t *testing.T) {
+		// 测试Radio可以作为Component类型在切片中使用
+		radio := NewRadio("gender", "性别")
+		input := NewInput("name", "姓名")
+
+		// 这模拟了在FormBuilder.SetRule中的使用
+		components := []contracts.Component{radio, input}
+
+		// 验证每个组件都可以正常使用
+		for _, component := range components {
+			result := component.Build()
+			assert.NotEmpty(t, result["field"], "每个组件都应该有field")
+			assert.NotEmpty(t, result["title"], "每个组件都应该有title")
+		}
 	})
 }
