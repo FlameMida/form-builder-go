@@ -98,7 +98,16 @@ func (c *Cascader) Build() map[string]interface{} {
 		for i, opt := range c.options {
 			opts[i] = opt.ToMap()
 		}
-		result["options"] = opts
+
+		// 确保 props 对象存在
+		if result["props"] == nil {
+			result["props"] = make(map[string]interface{})
+		}
+
+		// 将 options 添加到 props 内部
+		if props, ok := result["props"].(map[string]interface{}); ok {
+			props["options"] = opts
+		}
 	}
 	return result
 }

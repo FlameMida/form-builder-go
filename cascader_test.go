@@ -175,7 +175,9 @@ func TestCascaderBuild(t *testing.T) {
 			SetOptions(options)
 
 		result := cascader.Build()
-		opts, ok := result["options"].([]map[string]interface{})
+		props, ok := result["props"].(map[string]interface{})
+		require.True(t, ok)
+		opts, ok := props["options"].([]map[string]interface{})
 		require.True(t, ok)
 		assert.Len(t, opts, 2)
 		assert.Equal(t, "1", opts[0]["value"])
@@ -198,7 +200,8 @@ func TestCascaderBuild(t *testing.T) {
 			SetOptions(options)
 
 		result := cascader.Build()
-		opts := result["options"].([]map[string]interface{})
+		props := result["props"].(map[string]interface{})
+		opts := props["options"].([]map[string]interface{})
 		assert.Len(t, opts, 1)
 		assert.Equal(t, "parent", opts[0]["value"])
 
@@ -235,8 +238,11 @@ func TestCascaderEdgeCases(t *testing.T) {
 			SetOptions([]Option{})
 
 		result := cascader.Build()
-		_, hasOptions := result["options"]
-		assert.False(t, hasOptions)
+		props, hasProps := result["props"].(map[string]interface{})
+		if hasProps {
+			_, hasOptions := props["options"]
+			assert.False(t, hasOptions)
+		}
 	})
 
 	t.Run("ThreeLevelNesting", func(t *testing.T) {
@@ -261,7 +267,8 @@ func TestCascaderEdgeCases(t *testing.T) {
 			SetOptions(options)
 
 		result := cascader.Build()
-		opts := result["options"].([]map[string]interface{})
+		props := result["props"].(map[string]interface{})
+		opts := props["options"].([]map[string]interface{})
 		level1 := opts[0]
 		level2 := level1["children"].([]map[string]interface{})[0]
 		level3, ok := level2["children"].([]map[string]interface{})
